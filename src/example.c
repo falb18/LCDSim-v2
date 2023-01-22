@@ -31,6 +31,13 @@ int main (int argc, char** argv)
             default:
                 break;
         }
+
+        /* Draw the LCD on window */
+        LCDSim_Draw(lcd);
+
+        /* Refresh the window at 50 FPS */
+        SDL_RenderPresent(sdl_screen);
+        SDL_Delay(20);
     }
 
     printf("Free memory allocated for LCD window\n");

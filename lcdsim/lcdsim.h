@@ -71,6 +71,7 @@ typedef struct {
 /* Functions related to the LCD simulator: */
 
 LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y);
+void LCDSim_Draw(LCDSim *self);
 
 /* Functions related to the HD44780 hardware emulation: */
 

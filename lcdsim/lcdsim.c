@@ -25,6 +25,20 @@ LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y)
     return self;
 }
 
+void LCDSim_Draw(LCDSim *self)
+{
+    Uint32 nowTime = SDL_GetTicks();
+    
+    /* Copy image to LCD's buffer screen */
+    SDL_RenderCopy(self->gu.screen, self->gu.image, NULL, NULL);
+
+    if (nowTime - self->lastTime > 500)
+    {
+        self->mcu.LCD_CursorState = !self->mcu.LCD_CursorState;
+        self->lastTime = nowTime;
+    }
+}
+
 void HD44780_Init(HD44780 *self)
 {
 
@@ -82,7 +96,6 @@ void GraphicUnit_Init(GraphicUnit *self)
     self->temp_screen = SDL_CreateRGBSurface(0, 331, 149, 32, 0, 0, 0, 0);
 
     self->image = IMG_LoadTexture(self->screen, "../res/lcd_layout.bmp");
-    // self->image = SDL_LoadBMP("../res/lcd_layout.bmp");
     
     Pixel_Init(self->pixel);
 }
