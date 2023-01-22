@@ -56,9 +56,9 @@ typedef struct {
 typedef struct {
     Pixel pixel[32][CASE_WIDTH][CASE_HEIGHT];
     SDL_Rect position, on_screen;
-    SDL_Surface *screen;
+    SDL_Renderer *screen;
     SDL_Surface *temp_screen;
-    SDL_Surface *image;
+    SDL_Texture *image;
     SDL_Surface *color[2];
 } GraphicUnit;
 
@@ -70,6 +70,12 @@ typedef struct {
 
 /* Functions related to the LCD simulator: */
 
-LCDSim* LCDSim_Create(SDL_Surface *screen, int x, int y);
+LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y);
+
+/* Functions related to the HD44780 hardware emulation: */
+
+void HD44780_Init(HD44780 *self);
+void GraphicUnit_Init(GraphicUnit *self);
+void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT]);
 
 #endif /* LCDSIM_H */
