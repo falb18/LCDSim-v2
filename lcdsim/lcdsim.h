@@ -78,5 +78,6 @@ void LCDSim_Draw(LCDSim *self);
 void HD44780_Init(HD44780 *self);
 void GraphicUnit_Init(GraphicUnit *self);
 void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT]);
+void Pixel_Draw(GraphicUnit *self);
 
 #endif /* LCDSIM_H */

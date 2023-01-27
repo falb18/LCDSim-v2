@@ -37,6 +37,8 @@ void LCDSim_Draw(LCDSim *self)
         self->mcu.LCD_CursorState = !self->mcu.LCD_CursorState;
         self->lastTime = nowTime;
     }
+
+    Pixel_Draw(&self->gu);
 }
 
 void HD44780_Init(HD44780 *self)
@@ -122,9 +124,34 @@ void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT])
         {
             for(y = 0 ; y < CASE_HEIGHT; y++)
             {
-                pixel[z][x][y].position.x = OFFSET_X + (z % 16) * 16 + x*PIXEL_DIM;
-                pixel[z][x][y].position.y = OFFSET_Y + (z >= 16) * 25 + y*PIXEL_DIM;
+                pixel[z][x][y].position.x = OFFSET_X + ((z % 16) * 16) + (x * PIXEL_DIM);
+                pixel[z][x][y].position.y = OFFSET_Y + ((z >= 16) * 25) + (y * PIXEL_DIM);
+                pixel[z][x][y].position.w = PIXEL_DIM;
+                pixel[z][x][y].position.h = PIXEL_DIM;
                 pixel[z][x][y].color = GREEN;
+            }
+        }
+    }
+}
+
+void Pixel_Draw(GraphicUnit *self)
+{
+    Uint8 z, x, y;
+    Uint8 pixel_color;
+    SDL_Rect *pixel_area;
+    SDL_Texture *pixel_to_draw;
+
+    for (z = 0; z < 32; z++)
+    {
+        for (x = 0; x < CASE_WIDTH; x++)
+        {
+            for (y = 0; y < CASE_HEIGHT; y++)
+            {
+                pixel_color = self->pixel[z][x][y].color;
+                pixel_to_draw = self->color[pixel_color];
+                pixel_area = &self->pixel[z][x][y].position;
+
+                SDL_RenderCopy(self->screen, pixel_to_draw, NULL, pixel_area);
             }
         }
     }
