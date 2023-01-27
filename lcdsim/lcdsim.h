@@ -24,7 +24,7 @@
 
 /* Values for the LCD pixel colors */
 typedef enum Color Color;
-enum Color { BLACK = 0, GREEN = 1};
+enum Color { BLACK = 0, GREEN = 1, COLORS = 2};
 
 typedef enum Cursor Cursor;
 enum Cursor { FIXED = 0, BLINK = 1};
@@ -59,7 +59,7 @@ typedef struct {
     SDL_Renderer *screen;
     SDL_Surface *temp_screen;
     SDL_Texture *image;
-    SDL_Surface *color[2];
+    SDL_Texture *color[2];
 } GraphicUnit;
 
 typedef struct {

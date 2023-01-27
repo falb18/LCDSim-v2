@@ -29,7 +29,7 @@ void LCDSim_Draw(LCDSim *self)
 {
     Uint32 nowTime = SDL_GetTicks();
     
-    /* Copy image to LCD's buffer screen */
+    /* Copy image to LCD's screen buffer */
     SDL_RenderCopy(self->gu.screen, self->gu.image, NULL, NULL);
 
     if (nowTime - self->lastTime > 500)
@@ -83,18 +83,30 @@ void HD44780_Init(HD44780 *self)
 void GraphicUnit_Init(GraphicUnit *self)
 {
     Uint8 i;
+    SDL_Surface *colors_surface[COLORS];
+
     self->position.x = 0;
     self->position.y = 0;
 
-    for (i = 0; i < 2; i++)
+    /* Create the tiny pixels of the LCD: */
+    for (i = 0; i < COLORS; i++)
     {
-        self->color[i] = SDL_CreateRGBSurface(0,PIXEL_DIM,PIXEL_DIM, 32, 0, 0, 0, 0);
+        colors_surface[i] = SDL_CreateRGBSurface(0, PIXEL_DIM, PIXEL_DIM, 32, 0, 0, 0, 0);
     }
 
-    SDL_FillRect(self->color[0],NULL,SDL_MapRGB(self->color[0]->format, 0, 0, 0));
-    SDL_FillRect(self->color[1],NULL,SDL_MapRGB(self->color[1]->format, 125, 159, 50));
+    SDL_FillRect(colors_surface[BLACK], NULL, SDL_MapRGB(colors_surface[BLACK]->format, 0, 0, 0));
+    SDL_FillRect(colors_surface[GREEN], NULL, SDL_MapRGB(colors_surface[GREEN]->format, 125, 159, 50));
+
+    self->color[BLACK] = SDL_CreateTextureFromSurface(self->screen, colors_surface[BLACK]);
+    self->color[GREEN] = SDL_CreateTextureFromSurface(self->screen, colors_surface[GREEN]);
+
     self->temp_screen = SDL_CreateRGBSurface(0, 331, 149, 32, 0, 0, 0, 0);
 
+    /* Free the surfaces since are not going to be used anymore */
+    free(colors_surface[BLACK]);
+    free(colors_surface[GREEN]);
+
+    /* Load the image for the LCD: */
     self->image = IMG_LoadTexture(self->screen, "../res/lcd_layout.bmp");
     
     Pixel_Init(self->pixel);
@@ -116,5 +128,4 @@ void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT])
             }
         }
     }
-
 }
