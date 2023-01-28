@@ -21,6 +21,8 @@ int main (int argc, char** argv)
     /* Initialize the LCD object */
     lcd = LCDSim_Create(sdl_screen, 0, 0);
 
+    LCDSim_Instruction(lcd, 0x0100 | 'A');
+
     /* Run the program until the close button hasn't been pressed */
     while (hold) {
         SDL_PollEvent(&event);
