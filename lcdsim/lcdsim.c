@@ -174,6 +174,15 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
     }
 }
 
+LCDSim* LCDSim_Destroy(LCDSim *self)
+{
+    SDL_DestroyTexture(self->gu.image);
+    SDL_DestroyTexture(self->gu.color[0]);
+    SDL_DestroyTexture(self->gu.color[1]);
+    free(self);
+    return NULL;
+}
+
 void HD44780_Init(HD44780 *self)
 {
 

@@ -67,11 +67,12 @@ typedef struct {
     Uint32 lastTime;
 } LCDSim;
 
-/* Functions related to the LCD simulator: */
+/* Functions related to the LCD emulator: */
 
 LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y);
 void LCDSim_Draw(LCDSim *self);
 void LCDSim_Instruction(LCDSim *self, Uint16 instruction);
+LCDSim* LCDSim_Destroy(LCDSim *self);
 
 /* Functions related to the HD44780 hardware emulation: */
 

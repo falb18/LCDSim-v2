@@ -42,10 +42,8 @@ int main (int argc, char** argv)
         SDL_Delay(20);
     }
 
-    printf("Free memory allocated for LCD window\n");
+    lcd = LCDSim_Destroy(lcd);
     SDL_DestroyRenderer(sdl_screen);
     SDL_DestroyWindow(sdl_window);
-    SDL_DestroyTexture(lcd->gu.image);
-    SDL_DestroyTexture(lcd->gu.color[0]);
-    SDL_DestroyTexture(lcd->gu.color[1]);
+    SDL_Quit();
 }
