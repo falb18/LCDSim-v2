@@ -82,4 +82,20 @@ void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT]);
 void Pixel_Refresh(HD44780 mcu, Pixel pixel[][CASE_WIDTH][CASE_HEIGHT]);
 void Pixel_Draw(GraphicUnit *self);
 
+/* Functions to write on the LCD: */
+
+void LCD_PutChar(LCDSim *self, char car);
+void LCD_PutS(LCDSim *self, char *s);
+void LCD_State(LCDSim *self, Uint8 display_enable, Uint8 cursor_enable, Uint8 blink);
+void LCD_Clear(LCDSim *self);
+void LCD_Home(LCDSim *self);
+void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column);
+void LCD_Sh_Cursor_R(LCDSim *self);
+void LCD_Sh_Cursor_L(LCDSim *self);
+void LCD_Sh_Display_R(LCDSim *self);
+void LCD_Sh_Display_L(LCDSim *self);
+void LCD_ClearLine(LCDSim *self, Uint8 line);
+void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column);
+void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom);
+
 #endif /* LCDSIM_H */

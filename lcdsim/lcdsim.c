@@ -352,3 +352,98 @@ void Pixel_Draw(GraphicUnit *self)
         }
     }
 }
+
+void LCD_PutChar(LCDSim *self, char car)
+{
+    LCDSim_Instruction(self, 0x0100 | car);
+}
+
+void LCD_PutS(LCDSim *self, char *s)
+{
+    while (*s)
+        LCD_PutChar(self, *s++);
+}
+
+void LCD_Clear(LCDSim *self)
+{
+    LCDSim_Instruction(self, CLEAR_DISPLAY);
+}
+
+void LCD_Home(LCDSim *self)
+{
+    LCDSim_Instruction(self, LCD_HOME);
+}
+
+void LCD_State(LCDSim *self, Uint8 display_enable, Uint8 cursor_enable, Uint8 blink)
+{
+    LCDSim_Instruction(self, 0x08 | (display_enable << 2) | (cursor_enable << 1) | blink);
+}
+
+void LCD_Sh_Cursor_R(LCDSim *self)
+{
+    LCDSim_Instruction(self, SHIFT_CURSOR_RIGHT);
+}
+
+void LCD_Sh_Cursor_L(LCDSim *self)
+{
+   LCDSim_Instruction(self, SHIFT_CURSOR_LEFT);
+}
+
+void LCD_Sh_Display_R(LCDSim *self)
+{
+   LCDSim_Instruction(self, SHIFT_DISPLAY_RIGHT);
+}
+
+void LCD_Sh_Display_L(LCDSim *self)
+{
+    LCDSim_Instruction(self, SHIFT_DISPLAY_LEFT);
+}
+
+void LCD_ClearLine(LCDSim *self, Uint8 line)
+{
+    Uint8 i;
+    
+    if ((line == 0) || (line == 1))
+    {
+        LCD_SetCursor(self, line, 0);
+        
+        for (i = 0; i < 40; i++)
+        {
+            LCD_PutChar(self, ' ');
+        }
+        
+        LCD_SetCursor(self, line, 0);
+    }
+}
+
+void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column)
+{
+    Uint8 pos;
+
+    if ((column > 15) || (line > 1))
+    {
+        return;
+    }
+    
+    pos = (line * 0x40) + column;
+    LCDSim_Instruction(self, SET_DDRAM_AD | pos);
+}
+
+void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
+{
+    Uint8 i;
+
+    if(char_number < 0 && char_number > 7)
+    {
+        return;
+    }
+
+    LCDSim_Instruction(self, SET_CGRAM_AD | char_number * 0x08);
+    
+    for(i = 0; i < 8; i++)
+    {
+        LCD_PutChar(self, custom[i]);
+    }
+
+    LCDSim_Instruction(self, SET_DDRAM_AD);
+}
