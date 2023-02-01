@@ -24,10 +24,19 @@ To compile the project run the following command:
 cmake -S ./ -B build/
 cd build
 make
-``` 
+```
 
 To run the emulator:
 ```
 cd build/src
 ./lcd-example
 ```
+
+## Documentation
+
+- docs/cgrom-organization.md
+- docs/functions.md
+
+## Bibliography
+- [LCD 16x2 image](http://paulvollmer.net/FritzingParts/parts/lcd-GDM1602K.html)
+- [Instruction Set](https://mil.ufl.edu/3744/docs/lcdmanual/commands.html)
