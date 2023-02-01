@@ -4,8 +4,8 @@ This is an update of the library [LCDSim](https://github.com/dylangageot/LCDSim)
 The purpose of this project is to update the library so it uses SDL2, since the previous version of this library uses
 SDL v1.2, which is deprecated.
 
-LCDSim is a library written in C that allows you to emulate a HD44780 LCD 16x2 display on your computer. The display
-function is possible with the use of the SDL library and SDL-image library.
+LCDSim is a library written in **C** that allows you to emulate a HD44780 LCD 16x2 display on your computer.
+The display function is possible with the use of the SDL library and SDL-image library.
 
 The projects is built using the following:
 - Meta-build system: cmake 3.24.0 (snap version)
@@ -29,5 +29,5 @@ make
 To run the emulator:
 ```
 cd build/src
-./lcdsim
+./lcd-example
 ```
