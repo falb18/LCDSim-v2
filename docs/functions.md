@@ -47,7 +47,7 @@ void LCD_Clear(LCDSim *self);
 ```
 
 ---
-Clear the display. Require the address of the LCDSim object.
+Move the cursor to the beginning of the display.
 ```
 void LCD_Home(LCDSim *self);
 ```
