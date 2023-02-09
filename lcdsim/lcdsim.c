@@ -7,14 +7,36 @@
 
 #include "lcdsim.h"
 
-LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y)
-{
+/*
+ * Private variables
+ * ==============================================
+ */
 
+SDL_Window *sdl_window = NULL;
+SDL_Renderer *sdl_screen = NULL;
+
+/*
+ * External functions:
+ * ==============================================
+ */
+
+LCDSim* LCDSim_Init()
+{
+    /* Initialize SDL window and screen: */
+    SDL_Init(SDL_INIT_VIDEO);
+    sdl_window = SDL_CreateWindow("LCDSim 16x2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 331, 149, 0);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+
+    sdl_screen = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
+
+    SDL_UpdateWindowSurface(sdl_window);
+
+    /* Create LCD display: */
     LCDSim* self = malloc(sizeof(LCDSim));
 
     if (self != NULL)
     {
-        self->gu.screen = screen;
+        self->gu.screen = sdl_screen;
         HD44780_Init(&self->mcu);
         GraphicUnit_Init(&self->gu);
         self->lastTime = SDL_GetTicks();
@@ -177,6 +199,8 @@ LCDSim* LCDSim_Destroy(LCDSim *self)
     SDL_DestroyTexture(self->gu.image);
     SDL_DestroyTexture(self->gu.color[0]);
     SDL_DestroyTexture(self->gu.color[1]);
+    SDL_DestroyRenderer(sdl_screen);
+    SDL_DestroyWindow(sdl_window);
     free(self);
     return NULL;
 }

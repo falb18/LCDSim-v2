@@ -69,7 +69,7 @@ typedef struct {
 
 /* Functions related to the LCD emulator: */
 
-LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y);
+LCDSim* LCDSim_Init();
 void LCDSim_Draw(LCDSim *self);
 void LCDSim_Instruction(LCDSim *self, Uint16 instruction);
 LCDSim* LCDSim_Destroy(LCDSim *self);
