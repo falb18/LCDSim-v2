@@ -5,7 +5,6 @@ int main (int argc, char** argv)
     SDL_Event event;
     SDL_Window *sdl_window = NULL;
     SDL_Renderer *sdl_screen = NULL;
-    SDL_Texture *lcd_image = NULL;
     LCDSim *lcd = NULL;
     Uint8 hold = 1;
 
