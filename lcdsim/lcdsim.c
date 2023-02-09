@@ -15,8 +15,6 @@ LCDSim* LCDSim_Create(SDL_Renderer *screen, int x, int y)
     if (self != NULL)
     {
         self->gu.screen = screen;
-        self->gu.on_screen.x = x;
-        self->gu.on_screen.y = y;
         HD44780_Init(&self->mcu);
         GraphicUnit_Init(&self->gu);
         self->lastTime = SDL_GetTicks();

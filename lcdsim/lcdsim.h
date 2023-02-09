@@ -55,7 +55,7 @@ typedef struct {
 
 typedef struct {
     Pixel pixel[32][CASE_WIDTH][CASE_HEIGHT];
-    SDL_Rect position, on_screen;
+    SDL_Rect position;
     SDL_Renderer *screen;
     SDL_Texture *image;
     SDL_Texture *color[2];
