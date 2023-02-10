@@ -7,6 +7,71 @@
 
 #include "lcdsim.h"
 
+#define WINDOW_WIDTH 331
+#define WINDOW_HEIGHT 149
+
+/**
+ * The number of bytes for each character.
+ * The format is the following:
+ *  - 1 byte for the character code
+ *  - 8 bytes for the character pattern. 
+ */
+#define BYTES_PER_CHARACTER 9
+
+/**
+ * The number of bytes for each character pattern.
+ * The number comes from table 4, p.15 of the datasheet.
+ */
+#define BYTES_PER_PATTERN 8
+
+/**
+ * The total number of bytes the file has for the characters' pattern.
+ */
+#define CHARACTER_PATTERN_SIZE 1152
+
+/**
+ * The number of characters the LCD displays at once.
+ * Assuming a LCD of 16x2, the total is 32 characters.
+ */
+#define NUM_CHARS_LCD 32
+
+/**
+ * The number of characters per line.
+ * Assuming a LCD 16x2, the total is 16 characters.
+ */
+#define CHARS_PER_LINE 16
+
+/**
+ * The address refers to the DDRAM address wich corresponds to the beginning of the second
+ * line on the LCD. See p.12 of the datasheet.
+ */
+#define SECOND_LINE_ADDRESS 0x40
+
+/**
+ * The DDRAM address refers to the positio on the display. See p.11 of the datasheet.
+ */
+#define SET_DDRAM_ADDR 0x80
+
+/**
+ * The CGRAM address refers to custom characters defined by the user. See p.13 of the datasheet. 
+ */
+#define SET_CGRAM_ADDR 0x40
+
+/**
+ * The margin in the X axis between the LCD image and the pixels of the characters. 
+ */
+#define MARGIN_LCD_X 38
+
+/**
+ * The margin in the X axis between the LCD image and the pixels of the characters. 
+ */
+#define MARGIN_LCD_Y 50
+
+/**
+ * The modified pixel size of each pixel on the LCD. 
+ */
+#define PIXEL_SIZE 3
+
 /*
  * Private variables
  * ==============================================
@@ -24,7 +89,8 @@ LCDSim* LCDSim_Init()
 {
     /* Initialize SDL window and screen: */
     SDL_Init(SDL_INIT_VIDEO);
-    sdl_window = SDL_CreateWindow("LCDSim 16x2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 331, 149, 0);
+    sdl_window = SDL_CreateWindow("LCDSim 16x2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                    WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
     sdl_screen = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
@@ -84,7 +150,7 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                 if (self->mcu.DDRAM_counter < 104)
                 {
                     if (self->mcu.DDRAM_counter == 0x27)
-                        self->mcu.DDRAM_counter = 0x40;
+                        self->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
                     else
                         self->mcu.DDRAM_counter++;
                 }
@@ -98,7 +164,7 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
             {
                 if (self->mcu.DDRAM_counter > 0)
                 {
-                    if (self->mcu.DDRAM_counter == 0x40)
+                    if (self->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
                         self->mcu.DDRAM_counter = 0x27;
                     else
                         self->mcu.DDRAM_counter--;
@@ -150,7 +216,7 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                         if (self->mcu.DDRAM_counter < 104)
                         {
                             if (self->mcu.DDRAM_counter == 0x27)
-                                self->mcu.DDRAM_counter = 0x40;
+                                self->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
                             else
                                 self->mcu.DDRAM_counter++;
                         }
@@ -159,7 +225,7 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                     {
                         if (self->mcu.DDRAM_counter > 0)
                         {
-                            if (self->mcu.DDRAM_counter == 0x40)
+                            if (self->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
                                 self->mcu.DDRAM_counter = 0x27;
                             else
                                 self->mcu.DDRAM_counter--;
@@ -221,15 +287,15 @@ void HD44780_Init(HD44780 *self)
 
     /* Init CGROM */
     Uint16 i;
-    Uint8 j, cgrom_array[1152];
+    Uint8 j, cgrom_array[CHARACTER_PATTERN_SIZE];
     FILE *cgrom = fopen("../res/cgrom.bin", "rb");
     fread(cgrom_array, sizeof(cgrom_array), 1, cgrom);
 
-    for (i = 0; i < 1152; i += 9)
+    for (i = 0; i < CHARACTER_PATTERN_SIZE; i += BYTES_PER_CHARACTER)
     {
         if (cgrom_array[i] != 0)
         {
-            for (j = 0; j < 8; j++)
+            for (j = 0; j < BYTES_PER_PATTERN; j++)
             {
                 self->CGROM[cgrom_array[i]][j] = cgrom_array[i+j+1];
             }
@@ -257,7 +323,7 @@ void GraphicUnit_Init(GraphicUnit *self)
     /* Create the tiny pixels of the LCD: */
     for (i = 0; i < COLORS; i++)
     {
-        colors_surface[i] = SDL_CreateRGBSurface(0, PIXEL_DIM, PIXEL_DIM, 32, 0, 0, 0, 0);
+        colors_surface[i] = SDL_CreateRGBSurface(0, PIXEL_SIZE, PIXEL_SIZE, 32, 0, 0, 0, 0);
     }
 
     SDL_FillRect(colors_surface[BLACK], NULL, SDL_MapRGB(colors_surface[BLACK]->format, 0, 0, 0));
@@ -276,35 +342,35 @@ void GraphicUnit_Init(GraphicUnit *self)
     Pixel_Init(self->pixel);
 }
 
-void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT])
+void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
     Uint8 z, x , y;
 
-    for (z = 0; z < 32; z++)
+    for (z = 0; z < NUM_CHARS_LCD; z++)
     {
-        for(x = 0 ; x < CASE_WIDTH; x++)
+        for(x = 0 ; x < LCD_FONT_WIDTH; x++)
         {
-            for(y = 0 ; y < CASE_HEIGHT; y++)
+            for(y = 0 ; y < LCD_FONT_HEIGHT; y++)
             {
-                pixel[z][x][y].position.x = OFFSET_X + ((z % 16) * 16) + (x * PIXEL_DIM);
-                pixel[z][x][y].position.y = OFFSET_Y + ((z >= 16) * 25) + (y * PIXEL_DIM);
-                pixel[z][x][y].position.w = PIXEL_DIM;
-                pixel[z][x][y].position.h = PIXEL_DIM;
+                pixel[z][x][y].position.x = MARGIN_LCD_X + ((z % CHARS_PER_LINE) * CHARS_PER_LINE) + (x * PIXEL_SIZE);
+                pixel[z][x][y].position.y = MARGIN_LCD_Y + ((z >= CHARS_PER_LINE) * 25) + (y * PIXEL_SIZE);
+                pixel[z][x][y].position.w = PIXEL_SIZE;
+                pixel[z][x][y].position.h = PIXEL_SIZE;
                 pixel[z][x][y].color = GREEN;
             }
         }
     }
 }
 
-void Pixel_Refresh(HD44780 mcu, Pixel pixel[][CASE_WIDTH][CASE_HEIGHT])
+void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
     Uint8 z, x ,y, n;
     
-    for (z = 0; z < 32; z++)
+    for (z = 0; z < NUM_CHARS_LCD; z++)
     {
-        for (x = 0; x < CASE_WIDTH; x++)
+        for (x = 0; x < LCD_FONT_WIDTH; x++)
         {
-            for (y = 0; y < CASE_HEIGHT; y++)
+            for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
                 if (!mcu.LCD_DisplayEnable)
                 {
@@ -312,8 +378,8 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][CASE_WIDTH][CASE_HEIGHT])
                 }
                 else
                 {
-                    n = mcu.DDRAM_display + z%16 + (z >= 16) * 0x40;
-                    if ((mcu.CGROM[mcu.DDRAM[n]][y] >> (CASE_WIDTH - 1 - x)) & 0x01)
+                    n = mcu.DDRAM_display + (z % CHARS_PER_LINE) + (z >= CHARS_PER_LINE) * SECOND_LINE_ADDRESS;
+                    if ((mcu.CGROM[mcu.DDRAM[n]][y] >> (LCD_FONT_WIDTH - 1 - x)) & 0x01)
                     {
                         pixel[z][x][y].color = BLACK;
                     }
@@ -330,22 +396,22 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][CASE_WIDTH][CASE_HEIGHT])
     {
         if ((mcu.DDRAM_display <= mcu.DDRAM_counter) && ((mcu.DDRAM_display + 0x0F) >= mcu.DDRAM_counter))
         {
-            for (x = 0; x < CASE_WIDTH; x++)
+            for (x = 0; x < LCD_FONT_WIDTH; x++)
             {
-                for (y = 0; y < CASE_HEIGHT; y++)
+                for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
                     pixel[mcu.DDRAM_counter - mcu.DDRAM_display][x][y].color = BLACK;
                 }
             }
         }
 
-        if ((0x40 + mcu.DDRAM_display <= mcu.DDRAM_counter) && ((mcu.DDRAM_display + 0x4F) >= mcu.DDRAM_counter))
+        if ((SECOND_LINE_ADDRESS + mcu.DDRAM_display <= mcu.DDRAM_counter) && ((mcu.DDRAM_display + 0x4F) >= mcu.DDRAM_counter))
         {
-            for (x = 0; x < CASE_WIDTH; x++)
+            for (x = 0; x < LCD_FONT_WIDTH; x++)
             {
-                for (y = 0; y < CASE_HEIGHT; y++)
+                for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
-                    pixel[16 + mcu.DDRAM_counter - mcu.DDRAM_display - 0x40][x][y].color = BLACK;
+                    pixel[CHARS_PER_LINE + mcu.DDRAM_counter - mcu.DDRAM_display - SECOND_LINE_ADDRESS][x][y].color = BLACK;
                 }
             }
         }
@@ -359,11 +425,11 @@ void Pixel_Draw(GraphicUnit *self)
     SDL_Rect *pixel_area;
     SDL_Texture *pixel_to_draw;
 
-    for (z = 0; z < 32; z++)
+    for (z = 0; z < NUM_CHARS_LCD; z++)
     {
-        for (x = 0; x < CASE_WIDTH; x++)
+        for (x = 0; x < LCD_FONT_WIDTH; x++)
         {
-            for (y = 0; y < CASE_HEIGHT; y++)
+            for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
                 pixel_color = self->pixel[z][x][y].color;
                 pixel_to_draw = self->color[pixel_color];
@@ -447,8 +513,8 @@ void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column)
         return;
     }
     
-    pos = (line * 0x40) + column;
-    LCDSim_Instruction(self, SET_DDRAM_AD | pos);
+    pos = (line * SECOND_LINE_ADDRESS) + column;
+    LCDSim_Instruction(self, SET_DDRAM_ADDR | pos);
 }
 
 void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
@@ -460,12 +526,12 @@ void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
         return;
     }
 
-    LCDSim_Instruction(self, SET_CGRAM_AD | char_number * 0x08);
+    LCDSim_Instruction(self, SET_CGRAM_ADDR | char_number * 0x08);
     
     for(i = 0; i < 8; i++)
     {
         LCD_PutChar(self, custom[i]);
     }
 
-    LCDSim_Instruction(self, SET_DDRAM_AD);
+    LCDSim_Instruction(self, SET_DDRAM_ADDR);
 }

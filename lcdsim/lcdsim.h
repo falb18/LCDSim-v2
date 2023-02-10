@@ -14,13 +14,18 @@
 #define SHIFT_DISPLAY_LEFT   0x18
 #define SHIFT_DISPLAY_RIGHT  0x1C
 #define FUNCTION_SET         0x28
-#define SET_DDRAM_AD         0x80
-#define SET_CGRAM_AD         0x40
-#define CASE_WIDTH 5
-#define CASE_HEIGHT 8
-#define OFFSET_X 38
-#define OFFSET_Y 50
-#define PIXEL_DIM 3
+
+/**
+ * The width in pixels of the LCD font.
+ * Usually the font size for alphanumerc LCDs is 5x8.
+ */
+#define LCD_FONT_WIDTH  5
+
+/**
+ * The height in pixels of the LCD font.
+ * Usually the font size for alphanumerc LCDs is 5x8.
+ */
+#define LCD_FONT_HEIGHT 8
 
 /* Values for the LCD pixel colors */
 typedef enum Color Color;
@@ -54,7 +59,7 @@ typedef struct {
 } HD44780;
 
 typedef struct {
-    Pixel pixel[32][CASE_WIDTH][CASE_HEIGHT];
+    Pixel pixel[32][LCD_FONT_WIDTH][LCD_FONT_HEIGHT];
     SDL_Rect position;
     SDL_Renderer *screen;
     SDL_Texture *image;
@@ -78,8 +83,8 @@ LCDSim* LCDSim_Destroy(LCDSim *self);
 
 void HD44780_Init(HD44780 *self);
 void GraphicUnit_Init(GraphicUnit *self);
-void Pixel_Init(Pixel pixel[][CASE_WIDTH][CASE_HEIGHT]);
-void Pixel_Refresh(HD44780 mcu, Pixel pixel[][CASE_WIDTH][CASE_HEIGHT]);
+void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
+void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
 void Pixel_Draw(GraphicUnit *self);
 
 /* Functions to write on the LCD: */
