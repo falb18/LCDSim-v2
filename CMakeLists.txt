@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(lcdsim VERSION 1.1.0)
+project(lcdsim-prj VERSION 1.1.0)
+
+message("LCDSimv2 version ${PROJECT_VERSION}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
