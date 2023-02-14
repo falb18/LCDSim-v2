@@ -1,4 +1,4 @@
-add_executable(lcd-example example.c)
+add_executable(lcd-example "lcd-example.c")
 
 # Copy the image to the build directory
 file(COPY ${CMAKE_SOURCE_DIR}/res/lcd_layout.bmp
