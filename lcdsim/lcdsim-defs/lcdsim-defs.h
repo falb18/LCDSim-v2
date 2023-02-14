@@ -1,5 +1,5 @@
-#ifndef LCDSIM_DEFINES_H
-#define LCDSIM_DEFINES_H
+#ifndef LCDSIM_DEFS_H
+#define LCDSIM_DEFS_H
 
 #include <SDL2/SDL.h>
 
@@ -94,4 +94,4 @@ typedef struct {
     Color color;
 } Pixel;
 
-#endif /* LCDSIM_DEFINES_H */
+#endif /* LCDSIM_DEFS_H */
