@@ -36,81 +36,81 @@ LCDSim* LCDSim_Init()
     SDL_UpdateWindowSurface(sdl_window);
 
     /* Create LCD display: */
-    LCDSim* self = malloc(sizeof(LCDSim));
+    LCDSim* lcdsim = malloc(sizeof(LCDSim));
 
-    if (self != NULL)
+    if (lcdsim != NULL)
     {
-        self->gu.screen = sdl_screen;
-        HD44780_Init(&self->mcu);
-        GraphicUnit_Init(&self->gu);
-        self->lastTime = SDL_GetTicks();
+        lcdsim->gu.screen = sdl_screen;
+        HD44780_Init(&lcdsim->mcu);
+        GraphicUnit_Init(&lcdsim->gu);
+        lcdsim->lastTime = SDL_GetTicks();
     }
     
-    return self;
+    return lcdsim;
 }
 
-void LCDSim_Draw(LCDSim *self)
+void LCDSim_Draw(LCDSim *lcdsim)
 {
     Uint32 nowTime = SDL_GetTicks();
     
     /* Copy image to LCD's screen buffer */
-    SDL_RenderCopy(self->gu.screen, self->gu.image, NULL, NULL);
+    SDL_RenderCopy(lcdsim->gu.screen, lcdsim->gu.image, NULL, NULL);
 
-    if (nowTime - self->lastTime > 500)
+    if (nowTime - lcdsim->lastTime > 500)
     {
-        self->mcu.LCD_CursorState = !self->mcu.LCD_CursorState;
-        self->lastTime = nowTime;
+        lcdsim->mcu.LCD_CursorState = !lcdsim->mcu.LCD_CursorState;
+        lcdsim->lastTime = nowTime;
     }
 
-    Pixel_Refresh(self->mcu, self->gu.pixel);
-    Pixel_Draw(&self->gu);
+    Pixel_Refresh(lcdsim->mcu, lcdsim->gu.pixel);
+    Pixel_Draw(&lcdsim->gu);
 }
 
-void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
+void LCDSim_Instruction(LCDSim *lcdsim, Uint16 instruction)
 {
 
     Uint8 i, n, m;
     if (instruction & 0x0100)
     {
-        if (self->mcu.RAM_current == CGR)
+        if (lcdsim->mcu.RAM_current == CGR)
         {
-            n = self->mcu.CGRAM_counter / 8;
-            m = self->mcu.CGRAM_counter % 8;
-            self->mcu.CGROM[n][m] = instruction & 0xFF;
-            if (self->mcu.CGRAM_counter < 64)
-                self->mcu.CGRAM_counter++;
+            n = lcdsim->mcu.CGRAM_counter / 8;
+            m = lcdsim->mcu.CGRAM_counter % 8;
+            lcdsim->mcu.CGROM[n][m] = instruction & 0xFF;
+            if (lcdsim->mcu.CGRAM_counter < 64)
+                lcdsim->mcu.CGRAM_counter++;
         }
         else
         {
-            self->mcu.DDRAM[self->mcu.DDRAM_counter] = instruction & 0xFF;
-            if (self->mcu.LCD_EntryMode & 0x02)
+            lcdsim->mcu.DDRAM[lcdsim->mcu.DDRAM_counter] = instruction & 0xFF;
+            if (lcdsim->mcu.LCD_EntryMode & 0x02)
             {
-                if (self->mcu.DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
+                if (lcdsim->mcu.DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
                 {
-                    if (self->mcu.DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
-                        self->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
+                    if (lcdsim->mcu.DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
+                        lcdsim->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
                     else
-                        self->mcu.DDRAM_counter++;
+                        lcdsim->mcu.DDRAM_counter++;
                 }
-                if (self->mcu.LCD_EntryMode & 0x01)
+                if (lcdsim->mcu.LCD_EntryMode & 0x01)
                 {
-                    if (self->mcu.DDRAM_display < 24)
-                        self->mcu.DDRAM_display++;
+                    if (lcdsim->mcu.DDRAM_display < 24)
+                        lcdsim->mcu.DDRAM_display++;
                 }
             }
             else
             {
-                if (self->mcu.DDRAM_counter > 0)
+                if (lcdsim->mcu.DDRAM_counter > 0)
                 {
-                    if (self->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
-                        self->mcu.DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
+                    if (lcdsim->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
+                        lcdsim->mcu.DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
                     else
-                        self->mcu.DDRAM_counter--;
+                        lcdsim->mcu.DDRAM_counter--;
                 }
-                if (self->mcu.LCD_EntryMode & 0x01)
+                if (lcdsim->mcu.LCD_EntryMode & 0x01)
                 {
-                    if (self->mcu.DDRAM_display > 0)
-                        self->mcu.DDRAM_display--;
+                    if (lcdsim->mcu.DDRAM_display > 0)
+                        lcdsim->mcu.DDRAM_display--;
                 }
             }
         }
@@ -124,13 +124,13 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
         {
             /* SET DDRAM ADDRESS */
             case 0:
-                self->mcu.DDRAM_counter = instruction & 0x7F;
-                self->mcu.RAM_current = DDR;
+                lcdsim->mcu.DDRAM_counter = instruction & 0x7F;
+                lcdsim->mcu.RAM_current = DDR;
                 break;
             /* SET CGRAM ADDRESS */
             case 1:
-                self->mcu.CGRAM_counter = instruction & 0x3F;
-                self->mcu.RAM_current = CGR;
+                lcdsim->mcu.CGRAM_counter = instruction & 0x3F;
+                lcdsim->mcu.RAM_current = CGR;
                 break;
             /* CURSOR/DISPLAY SHIFT */
             case 3:
@@ -138,141 +138,141 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                 {
                     if (instruction & 0x04)
                     {
-                        if (self->mcu.DDRAM_display < 24)
-                            self->mcu.DDRAM_display++;
+                        if (lcdsim->mcu.DDRAM_display < 24)
+                            lcdsim->mcu.DDRAM_display++;
                     }
                     else
                     {
-                        if (self->mcu.DDRAM_display > 0)
-                            self->mcu.DDRAM_display--;
+                        if (lcdsim->mcu.DDRAM_display > 0)
+                            lcdsim->mcu.DDRAM_display--;
                     }
                 }
                 else
                 {
                     if (instruction & 0x04)
                     {
-                        if (self->mcu.DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
+                        if (lcdsim->mcu.DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
                         {
-                            if (self->mcu.DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
-                                self->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
+                            if (lcdsim->mcu.DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
+                                lcdsim->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
                             else
-                                self->mcu.DDRAM_counter++;
+                                lcdsim->mcu.DDRAM_counter++;
                         }
                     }
                     else
                     {
-                        if (self->mcu.DDRAM_counter > 0)
+                        if (lcdsim->mcu.DDRAM_counter > 0)
                         {
-                            if (self->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
-                                self->mcu.DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
+                            if (lcdsim->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
+                                lcdsim->mcu.DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
                             else
-                                self->mcu.DDRAM_counter--;
+                                lcdsim->mcu.DDRAM_counter--;
                         }
                     }
                 }
                 break;
             /* DISPLAY ON/OFF CONTROL */
             case 4:
-                self->mcu.LCD_CursorBlink = instruction & 0x01;
-                self->mcu.LCD_CursorEnable = (instruction & 0x02) >> 1;
-                self->mcu.LCD_DisplayEnable = (instruction & 0x04) >> 2;
-                self->mcu.LCD_CursorState = 0;
+                lcdsim->mcu.LCD_CursorBlink = instruction & 0x01;
+                lcdsim->mcu.LCD_CursorEnable = (instruction & 0x02) >> 1;
+                lcdsim->mcu.LCD_DisplayEnable = (instruction & 0x04) >> 2;
+                lcdsim->mcu.LCD_CursorState = 0;
                 break;
             /* ENTRY MODE SET */
             case 5:
-                self->mcu.LCD_EntryMode = instruction & 0x03;
+                lcdsim->mcu.LCD_EntryMode = instruction & 0x03;
                 break;
             /* HOME */
             case 6:
-                self->mcu.DDRAM_counter = 0;
-                self->mcu.DDRAM_display = 0;
+                lcdsim->mcu.DDRAM_counter = 0;
+                lcdsim->mcu.DDRAM_display = 0;
                 break;
             /* CLEAR */
             case 7:
                 for (i = 0; i < 80; i++)
-                    self->mcu.DDRAM[i] = 0x20;
-                self->mcu.DDRAM_counter = 0;
-                self->mcu.DDRAM_display = 0;
+                    lcdsim->mcu.DDRAM[i] = 0x20;
+                lcdsim->mcu.DDRAM_counter = 0;
+                lcdsim->mcu.DDRAM_display = 0;
                 break;
         }
     }
 }
 
-LCDSim* LCDSim_Destroy(LCDSim *self)
+LCDSim* LCDSim_Destroy(LCDSim *lcdsim)
 {
-    SDL_DestroyTexture(self->gu.image);
-    SDL_DestroyTexture(self->gu.color[0]);
-    SDL_DestroyTexture(self->gu.color[1]);
+    SDL_DestroyTexture(lcdsim->gu.image);
+    SDL_DestroyTexture(lcdsim->gu.color[0]);
+    SDL_DestroyTexture(lcdsim->gu.color[1]);
     SDL_DestroyRenderer(sdl_screen);
     SDL_DestroyWindow(sdl_window);
-    free(self);
+    free(lcdsim);
     return NULL;
 }
 
-void LCD_PutChar(LCDSim *self, char car)
+void LCD_PutChar(LCDSim *lcdsim, char car)
 {
-    LCDSim_Instruction(self, 0x0100 | car);
+    LCDSim_Instruction(lcdsim, 0x0100 | car);
 }
 
-void LCD_PutS(LCDSim *self, char *s)
+void LCD_PutS(LCDSim *lcdsim, char *s)
 {
     while (*s)
-        LCD_PutChar(self, *s++);
+        LCD_PutChar(lcdsim, *s++);
 }
 
-void LCD_Clear(LCDSim *self)
+void LCD_Clear(LCDSim *lcdsim)
 {
-    LCDSim_Instruction(self, CLEAR_DISPLAY);
+    LCDSim_Instruction(lcdsim, CLEAR_DISPLAY);
 }
 
-void LCD_Home(LCDSim *self)
+void LCD_Home(LCDSim *lcdsim)
 {
-    LCDSim_Instruction(self, LCD_HOME);
+    LCDSim_Instruction(lcdsim, LCD_HOME);
 }
 
-void LCD_State(LCDSim *self, Uint8 display_enable, Uint8 cursor_enable, Uint8 blink)
+void LCD_State(LCDSim *lcdsim, Uint8 display_enable, Uint8 cursor_enable, Uint8 blink)
 {
-    LCDSim_Instruction(self, 0x08 | (display_enable << 2) | (cursor_enable << 1) | blink);
+    LCDSim_Instruction(lcdsim, 0x08 | (display_enable << 2) | (cursor_enable << 1) | blink);
 }
 
-void LCD_Sh_Cursor_R(LCDSim *self)
+void LCD_Sh_Cursor_R(LCDSim *lcdsim)
 {
-    LCDSim_Instruction(self, SHIFT_CURSOR_RIGHT);
+    LCDSim_Instruction(lcdsim, SHIFT_CURSOR_RIGHT);
 }
 
-void LCD_Sh_Cursor_L(LCDSim *self)
+void LCD_Sh_Cursor_L(LCDSim *lcdsim)
 {
-   LCDSim_Instruction(self, SHIFT_CURSOR_LEFT);
+   LCDSim_Instruction(lcdsim, SHIFT_CURSOR_LEFT);
 }
 
-void LCD_Sh_Display_R(LCDSim *self)
+void LCD_Sh_Display_R(LCDSim *lcdsim)
 {
-   LCDSim_Instruction(self, SHIFT_DISPLAY_RIGHT);
+   LCDSim_Instruction(lcdsim, SHIFT_DISPLAY_RIGHT);
 }
 
-void LCD_Sh_Display_L(LCDSim *self)
+void LCD_Sh_Display_L(LCDSim *lcdsim)
 {
-    LCDSim_Instruction(self, SHIFT_DISPLAY_LEFT);
+    LCDSim_Instruction(lcdsim, SHIFT_DISPLAY_LEFT);
 }
 
-void LCD_ClearLine(LCDSim *self, Uint8 line)
+void LCD_ClearLine(LCDSim *lcdsim, Uint8 line)
 {
     Uint8 i;
     
     if ((line == 0) || (line == 1))
     {
-        LCD_SetCursor(self, line, 0);
+        LCD_SetCursor(lcdsim, line, 0);
         
         for (i = 0; i < 40; i++)
         {
-            LCD_PutChar(self, ' ');
+            LCD_PutChar(lcdsim, ' ');
         }
         
-        LCD_SetCursor(self, line, 0);
+        LCD_SetCursor(lcdsim, line, 0);
     }
 }
 
-void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column)
+void LCD_SetCursor(LCDSim *lcdsim, Uint8 line, Uint8 column)
 {
     Uint8 pos;
 
@@ -282,10 +282,10 @@ void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column)
     }
     
     pos = (line * SECOND_LINE_ADDRESS) + column;
-    LCDSim_Instruction(self, SET_DDRAM_ADDRESS | pos);
+    LCDSim_Instruction(lcdsim, SET_DDRAM_ADDRESS | pos);
 }
 
-void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
+void LCD_CustomChar(LCDSim *lcdsim, Uint8 char_number, Uint8* custom)
 {
     Uint8 i;
 
@@ -294,12 +294,12 @@ void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
         return;
     }
 
-    LCDSim_Instruction(self, SET_CGRAM_ADDRESS | char_number * 0x08);
+    LCDSim_Instruction(lcdsim, SET_CGRAM_ADDRESS | char_number * 0x08);
     
     for(i = 0; i < 8; i++)
     {
-        LCD_PutChar(self, custom[i]);
+        LCD_PutChar(lcdsim, custom[i]);
     }
 
-    LCDSim_Instruction(self, SET_DDRAM_ADDRESS);
+    LCDSim_Instruction(lcdsim, SET_DDRAM_ADDRESS);
 }

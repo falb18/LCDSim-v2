@@ -30,10 +30,10 @@ typedef struct {
 
 /* Functions related to the HD44780 hardware emulation: */
 
-void HD44780_Init(HD44780 *self);
-void GraphicUnit_Init(GraphicUnit *self);
+void HD44780_Init(HD44780 *mcu);
+void GraphicUnit_Init(GraphicUnit *graph_unit);
 void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
 void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
-void Pixel_Draw(GraphicUnit *self);
+void Pixel_Draw(GraphicUnit *graph_unit);
 
 #endif /* HD44780_H */

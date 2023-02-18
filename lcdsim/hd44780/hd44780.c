@@ -3,19 +3,19 @@
 
 #define CGROM_BIN_FILE "cgrom.bin"
 
-void HD44780_Init(HD44780 *self)
+void HD44780_Init(HD44780 *mcu)
 {
 
     /* Init internal registers of the HD44780 hardware emulator */
-    self->CGRAM_counter = 0;
-    self->DDRAM_counter = 0;
-    self->DDRAM_display = 0;
-    self->LCD_EntryMode = 0x02;
-    self->LCD_CursorEnable = 0;
-    self->LCD_CursorBlink = FIXED;
-    self->LCD_CursorState = 0;
-    self->LCD_DisplayEnable = 1;
-    self->RAM_current = DDR;
+    mcu->CGRAM_counter = 0;
+    mcu->DDRAM_counter = 0;
+    mcu->DDRAM_display = 0;
+    mcu->LCD_EntryMode = 0x02;
+    mcu->LCD_CursorEnable = 0;
+    mcu->LCD_CursorBlink = FIXED;
+    mcu->LCD_CursorState = 0;
+    mcu->LCD_DisplayEnable = 1;
+    mcu->RAM_current = DDR;
 
     /* Init CGROM */
     Uint16 i;
@@ -36,7 +36,7 @@ void HD44780_Init(HD44780 *self)
         {
             for (j = 0; j < BYTES_PER_PATTERN; j++)
             {
-                self->CGROM[cgrom_array[i]][j] = cgrom_array[i+j+1];
+                mcu->CGROM[cgrom_array[i]][j] = cgrom_array[i+j+1];
             }
         }
         else
@@ -48,16 +48,16 @@ void HD44780_Init(HD44780 *self)
     fclose(cgrom);
 
     /* Initialize DDRAM with blank character (character code = 0x20) */
-    memset(self->DDRAM, 0x20, 104);
+    memset(mcu->DDRAM, 0x20, 104);
 }
 
-void GraphicUnit_Init(GraphicUnit *self)
+void GraphicUnit_Init(GraphicUnit *graph_unit)
 {
     Uint8 i;
     SDL_Surface *colors_surface[COLORS];
 
-    self->position.x = 0;
-    self->position.y = 0;
+    graph_unit->position.x = 0;
+    graph_unit->position.y = 0;
 
     /* Create the tiny pixels of the LCD: */
     for (i = 0; i < COLORS; i++)
@@ -68,17 +68,17 @@ void GraphicUnit_Init(GraphicUnit *self)
     SDL_FillRect(colors_surface[BLACK], NULL, SDL_MapRGB(colors_surface[BLACK]->format, 0, 0, 0));
     SDL_FillRect(colors_surface[GREEN], NULL, SDL_MapRGB(colors_surface[GREEN]->format, 125, 159, 50));
 
-    self->color[BLACK] = SDL_CreateTextureFromSurface(self->screen, colors_surface[BLACK]);
-    self->color[GREEN] = SDL_CreateTextureFromSurface(self->screen, colors_surface[GREEN]);
+    graph_unit->color[BLACK] = SDL_CreateTextureFromSurface(graph_unit->screen, colors_surface[BLACK]);
+    graph_unit->color[GREEN] = SDL_CreateTextureFromSurface(graph_unit->screen, colors_surface[GREEN]);
 
     /* Free the surfaces since are not going to be used anymore */
     free(colors_surface[BLACK]);
     free(colors_surface[GREEN]);
 
     /* Load the image for the LCD: */
-    self->image = IMG_LoadTexture(self->screen, "../res/lcd_layout.bmp");
+    graph_unit->image = IMG_LoadTexture(graph_unit->screen, "../res/lcd_layout.bmp");
     
-    Pixel_Init(self->pixel);
+    Pixel_Init(graph_unit->pixel);
 }
 
 void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
@@ -144,7 +144,8 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
             }
         }
 
-        if ((SECOND_LINE_ADDRESS + mcu.DDRAM_display <= mcu.DDRAM_counter) && ((mcu.DDRAM_display + 0x4F) >= mcu.DDRAM_counter))
+        if ((SECOND_LINE_ADDRESS + mcu.DDRAM_display <= mcu.DDRAM_counter) &&
+                ((mcu.DDRAM_display + 0x4F) >= mcu.DDRAM_counter))
         {
             for (x = 0; x < LCD_FONT_WIDTH; x++)
             {
@@ -157,7 +158,7 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
     }
 }
 
-void Pixel_Draw(GraphicUnit *self)
+void Pixel_Draw(GraphicUnit *graph_unit)
 {
     Uint8 z, x, y;
     Uint8 pixel_color;
@@ -170,11 +171,11 @@ void Pixel_Draw(GraphicUnit *self)
         {
             for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
-                pixel_color = self->pixel[z][x][y].color;
-                pixel_to_draw = self->color[pixel_color];
-                pixel_area = &self->pixel[z][x][y].position;
+                pixel_color = graph_unit->pixel[z][x][y].color;
+                pixel_to_draw = graph_unit->color[pixel_color];
+                pixel_area = &graph_unit->pixel[z][x][y].position;
 
-                SDL_RenderCopy(self->screen, pixel_to_draw, NULL, pixel_area);
+                SDL_RenderCopy(graph_unit->screen, pixel_to_draw, NULL, pixel_area);
             }
         }
     }
