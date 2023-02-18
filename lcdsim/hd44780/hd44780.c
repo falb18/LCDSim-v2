@@ -1,6 +1,8 @@
 #include "../lcdsim-defs/lcdsim-defs.h"
 #include "hd44780.h"
 
+#define CGROM_BIN_FILE "cgrom.bin"
+
 void HD44780_Init(HD44780 *self)
 {
 
@@ -21,7 +23,7 @@ void HD44780_Init(HD44780 *self)
     FILE *cgrom = fopen("../res/cgrom.bin", "rb");
     if (cgrom == NULL)
     {
-        printf("File not found\n");
+        printf("File %s not found\n", CGROM_BIN_FILE);
     }
     else
     {
