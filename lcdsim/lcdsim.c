@@ -85,9 +85,9 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
             self->mcu.DDRAM[self->mcu.DDRAM_counter] = instruction & 0xFF;
             if (self->mcu.LCD_EntryMode & 0x02)
             {
-                if (self->mcu.DDRAM_counter < 104)
+                if (self->mcu.DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
                 {
-                    if (self->mcu.DDRAM_counter == 0x27)
+                    if (self->mcu.DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
                         self->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
                     else
                         self->mcu.DDRAM_counter++;
@@ -103,7 +103,7 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                 if (self->mcu.DDRAM_counter > 0)
                 {
                     if (self->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
-                        self->mcu.DDRAM_counter = 0x27;
+                        self->mcu.DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
                     else
                         self->mcu.DDRAM_counter--;
                 }
@@ -151,9 +151,9 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                 {
                     if (instruction & 0x04)
                     {
-                        if (self->mcu.DDRAM_counter < 104)
+                        if (self->mcu.DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
                         {
-                            if (self->mcu.DDRAM_counter == 0x27)
+                            if (self->mcu.DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
                                 self->mcu.DDRAM_counter = SECOND_LINE_ADDRESS;
                             else
                                 self->mcu.DDRAM_counter++;
@@ -164,7 +164,7 @@ void LCDSim_Instruction(LCDSim *self, Uint16 instruction)
                         if (self->mcu.DDRAM_counter > 0)
                         {
                             if (self->mcu.DDRAM_counter == SECOND_LINE_ADDRESS)
-                                self->mcu.DDRAM_counter = 0x27;
+                                self->mcu.DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
                             else
                                 self->mcu.DDRAM_counter--;
                         }
@@ -282,7 +282,7 @@ void LCD_SetCursor(LCDSim *self, Uint8 line, Uint8 column)
     }
     
     pos = (line * SECOND_LINE_ADDRESS) + column;
-    LCDSim_Instruction(self, SET_DDRAM_ADDR | pos);
+    LCDSim_Instruction(self, SET_DDRAM_ADDRESS | pos);
 }
 
 void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
@@ -294,12 +294,12 @@ void LCD_CustomChar(LCDSim *self, Uint8 char_number, Uint8* custom)
         return;
     }
 
-    LCDSim_Instruction(self, SET_CGRAM_ADDR | char_number * 0x08);
+    LCDSim_Instruction(self, SET_CGRAM_ADDRESS | char_number * 0x08);
     
     for(i = 0; i < 8; i++)
     {
         LCD_PutChar(self, custom[i]);
     }
 
-    LCDSim_Instruction(self, SET_DDRAM_ADDR);
+    LCDSim_Instruction(self, SET_DDRAM_ADDRESS);
 }

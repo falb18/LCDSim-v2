@@ -47,20 +47,32 @@
 #define CHARS_PER_LINE 16
 
 /**
+ * The address refers to the DDRAM address which corresponds to the last position of the first line on the LCD.
+ * See p.11 of the datasheet.
+ */
+#define FIRST_LINE_LAST_POS_DDRAM_ADDR 0x27
+
+/**
+ * The address refers to the DDRAM address which corresponds to the last position of the second line on the LCD.
+ * See p.11 of the datasheet.
+ */
+#define SECOND_LINE_LAST_POS_DDRAM_ADDR 0x67
+
+/**
  * The address refers to the DDRAM address wich corresponds to the beginning of the second
- * line on the LCD. See p.12 of the datasheet.
+ * line on the LCD. See p.11 of the datasheet.
  */
 #define SECOND_LINE_ADDRESS 0x40
 
 /**
  * The DDRAM address refers to the positio on the display. See p.11 of the datasheet.
  */
-#define SET_DDRAM_ADDR 0x80
+#define SET_DDRAM_ADDRESS 0x80
 
 /**
  * The CGRAM address refers to custom characters defined by the user. See p.13 of the datasheet. 
  */
-#define SET_CGRAM_ADDR 0x40
+#define SET_CGRAM_ADDRESS 0x40
 
 /**
  * The margin in the X axis between the LCD image and the pixels of the characters. 
