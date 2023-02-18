@@ -83,19 +83,19 @@ void GraphicUnit_Init(GraphicUnit *graph_unit)
 
 void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
-    Uint8 z, x , y;
+    Uint8 char_idx, x , y;
 
-    for (z = 0; z < NUM_CHARS_LCD; z++)
+    for (char_idx = 0; char_idx < NUM_CHARS_LCD; char_idx++)
     {
         for(x = 0 ; x < LCD_FONT_WIDTH; x++)
         {
             for(y = 0 ; y < LCD_FONT_HEIGHT; y++)
             {
-                pixel[z][x][y].position.x = MARGIN_LCD_X + ((z % CHARS_PER_LINE) * CHARS_PER_LINE) + (x * PIXEL_SIZE);
-                pixel[z][x][y].position.y = MARGIN_LCD_Y + ((z >= CHARS_PER_LINE) * 25) + (y * PIXEL_SIZE);
-                pixel[z][x][y].position.w = PIXEL_SIZE;
-                pixel[z][x][y].position.h = PIXEL_SIZE;
-                pixel[z][x][y].color = GREEN;
+                pixel[char_idx][x][y].position.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * CHARS_PER_LINE) + (x * PIXEL_SIZE);
+                pixel[char_idx][x][y].position.y = MARGIN_LCD_Y + ((char_idx >= CHARS_PER_LINE) * 25) + (y * PIXEL_SIZE);
+                pixel[char_idx][x][y].position.w = PIXEL_SIZE;
+                pixel[char_idx][x][y].position.h = PIXEL_SIZE;
+                pixel[char_idx][x][y].color = GREEN;
             }
         }
     }
@@ -103,9 +103,9 @@ void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 
 void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
-    Uint8 z, x ,y, n;
+    Uint8 char_idx, x ,y, n;
     
-    for (z = 0; z < NUM_CHARS_LCD; z++)
+    for (char_idx = 0; char_idx < NUM_CHARS_LCD; char_idx++)
     {
         for (x = 0; x < LCD_FONT_WIDTH; x++)
         {
@@ -113,18 +113,18 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
             {
                 if (!mcu.LCD_DisplayEnable)
                 {
-                    pixel[z][x][y].color = GREEN;
+                    pixel[char_idx][x][y].color = GREEN;
                 }
                 else
                 {
-                    n = mcu.DDRAM_display + (z % CHARS_PER_LINE) + (z >= CHARS_PER_LINE) * SECOND_LINE_ADDRESS;
+                    n = mcu.DDRAM_display + (char_idx % CHARS_PER_LINE) + (char_idx >= CHARS_PER_LINE) * SECOND_LINE_ADDRESS;
                     if ((mcu.CGROM[mcu.DDRAM[n]][y] >> (LCD_FONT_WIDTH - 1 - x)) & 0x01)
                     {
-                        pixel[z][x][y].color = BLACK;
+                        pixel[char_idx][x][y].color = BLACK;
                     }
                     else
                     {
-                        pixel[z][x][y].color = GREEN;
+                        pixel[char_idx][x][y].color = GREEN;
                     }
                 }
             }
@@ -160,20 +160,20 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 
 void Pixel_Draw(GraphicUnit *graph_unit)
 {
-    Uint8 z, x, y;
+    Uint8 char_idx, x, y;
     Uint8 pixel_color;
     SDL_Rect *pixel_area;
     SDL_Texture *pixel_to_draw;
 
-    for (z = 0; z < NUM_CHARS_LCD; z++)
+    for (char_idx = 0; char_idx < NUM_CHARS_LCD; char_idx++)
     {
         for (x = 0; x < LCD_FONT_WIDTH; x++)
         {
             for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
-                pixel_color = graph_unit->pixel[z][x][y].color;
+                pixel_color = graph_unit->pixel[char_idx][x][y].color;
                 pixel_to_draw = graph_unit->color[pixel_color];
-                pixel_area = &graph_unit->pixel[z][x][y].position;
+                pixel_area = &graph_unit->pixel[char_idx][x][y].position;
 
                 SDL_RenderCopy(graph_unit->screen, pixel_to_draw, NULL, pixel_area);
             }
