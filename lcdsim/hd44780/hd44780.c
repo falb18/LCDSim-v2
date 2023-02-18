@@ -91,8 +91,12 @@ void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
         {
             for(y = 0 ; y < LCD_FONT_HEIGHT; y++)
             {
-                pixel[char_idx][x][y].position.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * CHARS_PER_LINE) + (x * PIXEL_SIZE);
-                pixel[char_idx][x][y].position.y = MARGIN_LCD_Y + ((char_idx >= CHARS_PER_LINE) * 25) + (y * PIXEL_SIZE);
+                pixel[char_idx][x][y].position.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * CHARS_PER_LINE) +
+                                                    (x * PIXEL_SIZE);
+                
+                pixel[char_idx][x][y].position.y = MARGIN_LCD_Y + ((char_idx >= CHARS_PER_LINE) * 25) +
+                                                    (y * PIXEL_SIZE);
+                
                 pixel[char_idx][x][y].position.w = PIXEL_SIZE;
                 pixel[char_idx][x][y].position.h = PIXEL_SIZE;
                 pixel[char_idx][x][y].color = GREEN;
@@ -103,7 +107,9 @@ void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 
 void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
-    Uint8 char_idx, x ,y, n;
+    Uint8 char_idx, x ,y;
+    Uint8 ddram_address = 0;
+    Uint8 ddram_char_code = 0;
     
     for (char_idx = 0; char_idx < NUM_CHARS_LCD; char_idx++)
     {
@@ -117,8 +123,15 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
                 }
                 else
                 {
-                    n = mcu.DDRAM_display + (char_idx % CHARS_PER_LINE) + (char_idx >= CHARS_PER_LINE) * SECOND_LINE_ADDRESS;
-                    if ((mcu.CGROM[mcu.DDRAM[n]][y] >> (LCD_FONT_WIDTH - 1 - x)) & 0x01)
+                    /* Get the DDRAM address (LCD position) where the given character is going to be displayed */
+                    ddram_address = mcu.DDRAM_display + (char_idx % CHARS_PER_LINE) +
+                                    (char_idx >= CHARS_PER_LINE) * SECOND_LINE_ADDRESS;
+                    
+                    /* Get the character code fromt the DDRAM address */
+                    ddram_char_code = mcu.DDRAM[ddram_address];
+
+                    /* Turn ON or OFF the corresponding pixels of the character pattern given by the character code */
+                    if ((mcu.CGROM[ddram_char_code][y] >> (LCD_FONT_WIDTH - 1 - x)) & 0x01)
                     {
                         pixel[char_idx][x][y].color = BLACK;
                     }
@@ -131,6 +144,7 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
         }
     }
 
+    /* Turn ON or OFF the cursor depending of its configuraton */
     if ((mcu.LCD_CursorState || mcu.LCD_CursorBlink == FIXED) && mcu.LCD_DisplayEnable && mcu.LCD_CursorEnable)
     {
         if ((mcu.DDRAM_display <= mcu.DDRAM_counter) && ((mcu.DDRAM_display + 0x0F) >= mcu.DDRAM_counter))
@@ -139,7 +153,8 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
             {
                 for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
-                    pixel[mcu.DDRAM_counter - mcu.DDRAM_display][x][y].color = BLACK;
+                    char_idx = mcu.DDRAM_counter - mcu.DDRAM_display;
+                    pixel[char_idx][x][y].color = BLACK;
                 }
             }
         }
@@ -151,7 +166,8 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
             {
                 for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
-                    pixel[CHARS_PER_LINE + mcu.DDRAM_counter - mcu.DDRAM_display - SECOND_LINE_ADDRESS][x][y].color = BLACK;
+                    char_idx = CHARS_PER_LINE + mcu.DDRAM_counter - mcu.DDRAM_display - SECOND_LINE_ADDRESS;
+                    pixel[char_idx][x][y].color = BLACK;
                 }
             }
         }
