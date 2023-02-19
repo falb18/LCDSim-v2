@@ -9,7 +9,7 @@
 typedef struct {
     Actual RAM_current;
     Uint8 DDRAM[104];
-    Uint8 CGROM[128][8];
+    Uint8 CGROM[NUM_CHARACTER_CODES][8];
     Uint8 DDRAM_counter;
     Uint8 CGRAM_counter;
     Uint8 DDRAM_display;
@@ -21,16 +21,14 @@ typedef struct {
 } HD44780;
 
 typedef struct {
-    Pixel pixel[32][LCD_FONT_WIDTH][LCD_FONT_HEIGHT];
-    SDL_Rect position;
+    Uint8 lcd_pixels[NUM_CHARS_LCD][LCD_FONT_WIDTH][LCD_FONT_HEIGHT];
     SDL_Renderer *screen;
     SDL_Texture *image;
-    SDL_Texture *color[2];
 } GraphicUnit;
 
 /* Functions related to the HD44780 hardware emulation: */
 
 void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit);
-void HD44780_Draw(HD44780 mcu, GraphicUnit *graph_unit);
+void HD44780_Update(HD44780 mcu, GraphicUnit *graph_unit);
 
 #endif /* HD44780_H */

@@ -19,6 +19,14 @@ SDL_Window *sdl_window = NULL;
 SDL_Renderer *sdl_screen = NULL;
 
 /*
+ * Private function protoypes:
+ * ==============================================
+ */
+
+static void lcdsim_load_image(GraphicUnit *graph_unit);
+static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
+
+/*
  * External functions:
  * ==============================================
  */
@@ -42,6 +50,7 @@ LCDSim* LCDSim_Init()
     {
         lcdsim->gu.screen = sdl_screen;
         HD44780_Init(&lcdsim->mcu, &lcdsim->gu);
+        lcdsim_load_image(&lcdsim->gu);
         lcdsim->lastTime = SDL_GetTicks();
     }
     
@@ -61,7 +70,8 @@ void LCDSim_Draw(LCDSim *lcdsim)
         lcdsim->lastTime = nowTime;
     }
 
-    HD44780_Draw(lcdsim->mcu, &lcdsim->gu);
+    HD44780_Update(lcdsim->mcu, &lcdsim->gu);
+    lcdsim_draw_pixels(lcdsim->gu.lcd_pixels);
 }
 
 void LCDSim_Instruction(LCDSim *lcdsim, Uint16 instruction)
@@ -199,12 +209,48 @@ void LCDSim_Instruction(LCDSim *lcdsim, Uint16 instruction)
 LCDSim* LCDSim_Destroy(LCDSim *lcdsim)
 {
     SDL_DestroyTexture(lcdsim->gu.image);
-    SDL_DestroyTexture(lcdsim->gu.color[0]);
-    SDL_DestroyTexture(lcdsim->gu.color[1]);
     SDL_DestroyRenderer(sdl_screen);
     SDL_DestroyWindow(sdl_window);
     free(lcdsim);
     return NULL;
+}
+
+static void lcdsim_load_image(GraphicUnit *graph_unit)
+{
+    graph_unit->image = IMG_LoadTexture(graph_unit->screen, "../res/lcd_layout.bmp");
+}
+
+static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
+{
+    Uint8 char_idx, x, y;
+    Uint8 pixel_color;
+    SDL_Rect pixel;
+
+    pixel.w = PIXEL_SIZE;
+    pixel.h = PIXEL_SIZE;
+
+    for (char_idx = 0; char_idx < NUM_CHARS_LCD; char_idx++)
+    {
+        for (x = 0; x < LCD_FONT_WIDTH; x++)
+        {
+            for (y = 0; y < LCD_FONT_HEIGHT; y++)
+            {
+                if (pixels[char_idx][x][y] == BLACK)
+                {
+                    SDL_SetRenderDrawColor(sdl_screen, 0, 0, 0, SDL_ALPHA_OPAQUE);
+                }
+                else
+                {
+                    SDL_SetRenderDrawColor(sdl_screen, 125, 159, 50, SDL_ALPHA_OPAQUE);
+                }
+                
+                pixel.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * 16) + (x * PIXEL_SIZE);
+                pixel.y = MARGIN_LCD_Y + ((char_idx >= CHARS_PER_LINE) * 25) + (y * PIXEL_SIZE);
+
+                SDL_RenderFillRect(sdl_screen, &pixel);
+            }
+        }
+    }
 }
 
 void LCD_PutChar(LCDSim *lcdsim, char car)

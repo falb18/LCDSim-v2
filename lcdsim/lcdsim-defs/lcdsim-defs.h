@@ -16,6 +16,13 @@
 #define LCD_FONT_HEIGHT 8
 
 /**
+ * The total number of character codes defined in the CGROM.
+ * The number comes from table 4, p.18 of the datasheet.
+ * Although it support 240 characters, the file only has 128.
+ */
+#define NUM_CHARACTER_CODES 128
+
+/**
  * The number of bytes for each character.
  * The format is the following:
  *  - 1 byte for the character code
@@ -32,7 +39,7 @@
 /**
  * The total number of bytes the file has for the characters' pattern.
  */
-#define CHARACTER_PATTERN_SIZE 1152
+#define CHARACTER_PATTERN_SIZE (NUM_CHARACTER_CODES * BYTES_PER_CHARACTER)
 
 /**
  * The number of characters the LCD displays at once.
@@ -91,19 +98,32 @@
 
 /* Values for the LCD pixel colors */
 typedef enum Color Color;
-enum Color { BLACK = 0, GREEN = 1, COLORS = 2};
+enum Color
+{
+    GREEN = 0,
+    BLACK = 1,
+    COLORS = 2
+};
 
 typedef enum Cursor Cursor;
-enum Cursor { FIXED = 0, BLINK = 1};
+enum Cursor
+{
+    FIXED = 0,
+    BLINK = 1
+};
+
+enum Display_Ctrl
+{
+    DISPLAY_OFF = 0,
+    DISPLAY_ON = 1
+};
 
 /* Values to identify to which RAM we are going to write in */
 typedef enum Actual Actual;
-enum Actual { CGR = 0, DDR = 1};
-
-
-typedef struct {
-    SDL_Rect position;
-    Color color;
-} Pixel;
+enum Actual
+{
+    CGR = 0,
+    DDR = 1
+};
 
 #endif /* LCDSIM_DEFS_H */
