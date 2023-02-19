@@ -41,8 +41,7 @@ LCDSim* LCDSim_Init()
     if (lcdsim != NULL)
     {
         lcdsim->gu.screen = sdl_screen;
-        HD44780_Init(&lcdsim->mcu);
-        GraphicUnit_Init(&lcdsim->gu);
+        HD44780_Init(&lcdsim->mcu, &lcdsim->gu);
         lcdsim->lastTime = SDL_GetTicks();
     }
     
@@ -62,8 +61,7 @@ void LCDSim_Draw(LCDSim *lcdsim)
         lcdsim->lastTime = nowTime;
     }
 
-    Pixel_Refresh(lcdsim->mcu, lcdsim->gu.pixel);
-    Pixel_Draw(&lcdsim->gu);
+    HD44780_Draw(lcdsim->mcu, &lcdsim->gu);
 }
 
 void LCDSim_Instruction(LCDSim *lcdsim, Uint16 instruction)

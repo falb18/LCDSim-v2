@@ -3,7 +3,17 @@
 
 #define CGROM_BIN_FILE "cgrom.bin"
 
-void HD44780_Init(HD44780 *mcu)
+/*
+ * Private function protoypes:
+ * ==============================================
+ */
+
+static void GraphicUnit_Init(GraphicUnit *graph_unit);
+static void hd44780_reset_pixels(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
+static void hd44780_update_pixels(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
+static void hd44780_draw_pixels(GraphicUnit *graph_unit);
+
+void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit)
 {
 
     /* Init internal registers of the HD44780 hardware emulator */
@@ -49,9 +59,18 @@ void HD44780_Init(HD44780 *mcu)
 
     /* Initialize DDRAM with blank character (character code = 0x20) */
     memset(mcu->DDRAM, 0x20, 104);
+
+    GraphicUnit_Init(graph_unit);
+    hd44780_reset_pixels(graph_unit->pixel);
 }
 
-void GraphicUnit_Init(GraphicUnit *graph_unit)
+void HD44780_Draw(HD44780 mcu, GraphicUnit *graph_unit)
+{
+    hd44780_update_pixels(mcu, graph_unit->pixel);
+    hd44780_draw_pixels(graph_unit);
+}
+
+static void GraphicUnit_Init(GraphicUnit *graph_unit)
 {
     Uint8 i;
     SDL_Surface *colors_surface[COLORS];
@@ -77,11 +96,9 @@ void GraphicUnit_Init(GraphicUnit *graph_unit)
 
     /* Load the image for the LCD: */
     graph_unit->image = IMG_LoadTexture(graph_unit->screen, "../res/lcd_layout.bmp");
-    
-    Pixel_Init(graph_unit->pixel);
 }
 
-void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
+static void hd44780_reset_pixels(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
     Uint8 char_idx, x , y;
 
@@ -105,7 +122,7 @@ void Pixel_Init(Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
     }
 }
 
-void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
+static void hd44780_update_pixels(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
     Uint8 char_idx, x ,y;
     Uint8 ddram_address = 0;
@@ -174,7 +191,7 @@ void Pixel_Refresh(HD44780 mcu, Pixel pixel[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
     }
 }
 
-void Pixel_Draw(GraphicUnit *graph_unit)
+static void hd44780_draw_pixels(GraphicUnit *graph_unit)
 {
     Uint8 char_idx, x, y;
     Uint8 pixel_color;
