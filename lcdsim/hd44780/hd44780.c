@@ -12,6 +12,11 @@
 
 static void hd44780_update_pixels(HD44780 mcu, Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
 
+/*
+ * External functions:
+ * ==============================================
+ */
+
 void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit)
 {
     Uint16 i;
@@ -72,6 +77,143 @@ void HD44780_Update(HD44780 mcu, GraphicUnit *graph_unit)
     
     hd44780_update_pixels(mcu, graph_unit->lcd_pixels);
 }
+
+void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
+{
+    Uint8 i, n, m;
+
+    if (instruction & 0x0100)
+    {
+        if (mcu->RAM_current == CGR)
+        {
+            n = mcu->CGRAM_counter / 8;
+            m = mcu->CGRAM_counter % 8;
+            mcu->CGROM[n][m] = instruction & 0xFF;
+            if (mcu->CGRAM_counter < 64)
+                mcu->CGRAM_counter++;
+        }
+        else
+        {
+            mcu->DDRAM[mcu->DDRAM_counter] = instruction & 0xFF;
+            if (mcu->LCD_EntryMode & 0x02)
+            {
+                if (mcu->DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
+                {
+                    if (mcu->DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
+                        mcu->DDRAM_counter = SECOND_LINE_ADDRESS;
+                    else
+                        mcu->DDRAM_counter++;
+                }
+                if (mcu->LCD_EntryMode & 0x01)
+                {
+                    if (mcu->DDRAM_display < 24)
+                        mcu->DDRAM_display++;
+                }
+            }
+            else
+            {
+                if (mcu->DDRAM_counter > 0)
+                {
+                    if (mcu->DDRAM_counter == SECOND_LINE_ADDRESS)
+                        mcu->DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
+                    else
+                        mcu->DDRAM_counter--;
+                }
+                if (mcu->LCD_EntryMode & 0x01)
+                {
+                    if (mcu->DDRAM_display > 0)
+                        mcu->DDRAM_display--;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (i = 0; i < 8; i++)
+            if (instruction & (0x80 >> i))
+                break;
+        switch (i)
+        {
+            /* SET DDRAM ADDRESS */
+            case 0:
+                mcu->DDRAM_counter = instruction & 0x7F;
+                mcu->RAM_current = DDR;
+                break;
+            /* SET CGRAM ADDRESS */
+            case 1:
+                mcu->CGRAM_counter = instruction & 0x3F;
+                mcu->RAM_current = CGR;
+                break;
+            /* CURSOR/DISPLAY SHIFT */
+            case 3:
+                if (instruction & 0x08)
+                {
+                    if (instruction & 0x04)
+                    {
+                        if (mcu->DDRAM_display < 24)
+                            mcu->DDRAM_display++;
+                    }
+                    else
+                    {
+                        if (mcu->DDRAM_display > 0)
+                            mcu->DDRAM_display--;
+                    }
+                }
+                else
+                {
+                    if (instruction & 0x04)
+                    {
+                        if (mcu->DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
+                        {
+                            if (mcu->DDRAM_counter == FIRST_LINE_LAST_POS_DDRAM_ADDR)
+                                mcu->DDRAM_counter = SECOND_LINE_ADDRESS;
+                            else
+                                mcu->DDRAM_counter++;
+                        }
+                    }
+                    else
+                    {
+                        if (mcu->DDRAM_counter > 0)
+                        {
+                            if (mcu->DDRAM_counter == SECOND_LINE_ADDRESS)
+                                mcu->DDRAM_counter = FIRST_LINE_LAST_POS_DDRAM_ADDR;
+                            else
+                                mcu->DDRAM_counter--;
+                        }
+                    }
+                }
+                break;
+            /* DISPLAY ON/OFF CONTROL */
+            case 4:
+                mcu->LCD_CursorBlink = instruction & 0x01;
+                mcu->LCD_CursorEnable = (instruction & 0x02) >> 1;
+                mcu->LCD_DisplayEnable = (instruction & 0x04) >> 2;
+                mcu->LCD_CursorState = 0;
+                break;
+            /* ENTRY MODE SET */
+            case 5:
+                mcu->LCD_EntryMode = instruction & 0x03;
+                break;
+            /* HOME */
+            case 6:
+                mcu->DDRAM_counter = 0;
+                mcu->DDRAM_display = 0;
+                break;
+            /* CLEAR */
+            case 7:
+                for (i = 0; i < 80; i++)
+                    mcu->DDRAM[i] = 0x20;
+                mcu->DDRAM_counter = 0;
+                mcu->DDRAM_display = 0;
+                break;
+        }
+    }
+}
+
+/*
+ * Private functions:
+ * ==============================================
+ */
 
 static void hd44780_update_pixels(HD44780 mcu, Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
