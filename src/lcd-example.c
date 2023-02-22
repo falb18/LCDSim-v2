@@ -9,12 +9,6 @@ int main (int argc, char** argv)
     /* Initialize the LCD object */
     lcd = LCDSim_Init();
 
-    LCD_State(lcd, 1, 1, 1);
-    LCD_SetCursor(lcd, 0, 3);
-    LCD_PutS(lcd, "Hello,");
-    LCD_SetCursor(lcd, 1, 5);
-    LCD_PutS(lcd, "GitHub!");
-
     /* Run the program until the close button hasn't been pressed */
     while (hold) {
         SDL_PollEvent(&event);
