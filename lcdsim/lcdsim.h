@@ -31,20 +31,4 @@ void LCDSim_Draw(LCDSim *lcdsim);
 void LCDSim_Instruction(LCDSim *lcdsim, Uint16 instruction);
 LCDSim* LCDSim_Destroy(LCDSim *lcdsim);
 
-/* Functions to write on the LCD: */
-
-void LCD_PutChar(LCDSim *lcdsim, char car);
-void LCD_PutS(LCDSim *lcdsim, char *s);
-void LCD_State(LCDSim *lcdsim, Uint8 display_enable, Uint8 cursor_enable, Uint8 blink);
-void LCD_Clear(LCDSim *lcdsim);
-void LCD_Home(LCDSim *lcdsim);
-void LCD_SetCursor(LCDSim *lcdsim, Uint8 line, Uint8 column);
-void LCD_Sh_Cursor_R(LCDSim *lcdsim);
-void LCD_Sh_Cursor_L(LCDSim *lcdsim);
-void LCD_Sh_Display_R(LCDSim *lcdsim);
-void LCD_Sh_Display_L(LCDSim *lcdsim);
-void LCD_ClearLine(LCDSim *lcdsim, Uint8 line);
-void LCD_SetCursor(LCDSim *lcdsim, Uint8 line, Uint8 column);
-void LCD_CustomChar(LCDSim *lcdsim, Uint8 char_number, Uint8* custom);
-
 #endif /* LCDSIM_H */
