@@ -13,6 +13,7 @@ include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 
 # Libraries
 add_subdirectory(lcdsim)
+add_subdirectory(avr-hd44780)
 
 # Main application
 add_subdirectory(src)

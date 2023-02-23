@@ -1,4 +1,5 @@
 #include "lcdsim.h"
+#include "avr-hd44780.h"
 
 int main (int argc, char** argv)
 {
@@ -8,6 +9,14 @@ int main (int argc, char** argv)
 
     /* Initialize the LCD object */
     lcd = LCDSim_Init();
+
+    lcd_init_lib(lcd);
+    lcd_on();
+
+    lcd_set_cursor(3, 0);
+    lcd_puts("Hello");
+    lcd_set_cursor(5, 1);
+    lcd_puts("Github!");
 
     /* Run the program until the close button hasn't been pressed */
     while (hold) {
