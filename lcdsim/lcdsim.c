@@ -33,9 +33,13 @@ static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
 
 LCDSim* LCDSim_Init()
 {
+    char window_title[30];
+
+    sprintf(window_title, "LCDSim 16x2 v%s", LCDSIM_VERSION);
+
     /* Initialize SDL window and screen: */
     SDL_Init(SDL_INIT_VIDEO);
-    sdl_window = SDL_CreateWindow("LCDSim 16x2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    sdl_window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                     WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 

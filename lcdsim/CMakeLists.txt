@@ -15,3 +15,5 @@ target_include_directories(
 
 target_link_libraries(lcdsim PRIVATE ${SDL2_LIBRARIES})
 target_link_libraries(lcdsim PRIVATE ${SDL2_IMAGE_LIBRARIES})
+
+target_compile_definitions(lcdsim PRIVATE LCDSIM_VERSION="${CMAKE_PROJECT_VERSION}")
