@@ -11,6 +11,14 @@ find_package(SDL2_image REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 
+# Copy the image to the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/res/lcd_layout.bmp
+        DESTINATION ${CMAKE_BINARY_DIR}/res/)
+
+# Copy the binary file to the build directory
+file(COPY ${CMAKE_SOURCE_DIR}/res/cgrom.bin
+        DESTINATION ${CMAKE_BINARY_DIR}/res/)
+
 # Libraries
 add_subdirectory(lcdsim)
 add_subdirectory(avr-hd44780)
