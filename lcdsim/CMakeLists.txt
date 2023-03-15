@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-project(lcdsim VERSION ${PROJECT_VERSION})
+project(lcdsim VERSION ${CMAKE_PROJECT_VERSION})
 
 add_library(lcdsim STATIC
     "lcdsim.c"
