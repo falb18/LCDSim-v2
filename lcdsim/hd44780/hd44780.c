@@ -1,6 +1,5 @@
 #include <string.h>
 
-#include "../lcdsim-defs/lcdsim-defs.h"
 #include "hd44780.h"
 
 #define CGROM_BIN_FILE "cgrom.bin"
