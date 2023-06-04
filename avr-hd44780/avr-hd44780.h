@@ -95,7 +95,7 @@ void lcd_create_char(uint8_t location, uint8_t *charmap);
 void lcd_set_cursor(uint8_t col, uint8_t row);
 
 void lcd_puts(char *string);
-// void lcd_printf(char *format, ...);
+void lcd_printf(char *format, ...);
 
 
 #endif /* AVR_HD44780_H */
