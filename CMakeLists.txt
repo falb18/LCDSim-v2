@@ -21,7 +21,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/cgrom.bin
 
 # Libraries
 add_subdirectory(lcdsim)
-add_subdirectory(avr-hd44780)
 
-# Main application
-add_subdirectory(src)
+# Example applications
+add_subdirectory(examples)

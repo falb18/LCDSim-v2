@@ -16,7 +16,7 @@ int main (int argc, char** argv)
     lcd_set_cursor(3, 0);
     lcd_puts("Hello");
     lcd_set_cursor(5, 1);
-    lcd_puts("Github!");
+    lcd_puts("World!");
 
     /* Run the program until the close button hasn't been pressed */
     while (hold) {

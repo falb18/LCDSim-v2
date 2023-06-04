@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "../lcdsim/lcdsim.h"
+#include "lcdsim.h"
 
 /* #pragma once */
 

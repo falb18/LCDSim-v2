@@ -9,3 +9,5 @@ add_library(avr-hd44780 STATIC
 target_include_directories(
     avr-hd44780 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/
 )
+
+target_link_libraries(avr-hd44780 PRIVATE lcdsim)
