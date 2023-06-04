@@ -35,7 +35,7 @@ void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit)
     memset(mcu->CGROM, 0x00, (NUM_CHARACTER_CODES * BYTES_PER_PATTERN));
 
     /* Init CGROM */
-    FILE *cgrom = fopen("../res/cgrom.bin", "rb");
+    FILE *cgrom = fopen("res/cgrom.bin", "rb");
     
     if (cgrom == NULL)
     {

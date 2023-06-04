@@ -94,7 +94,7 @@ LCDSim* LCDSim_Destroy(LCDSim *lcdsim)
 
 static void lcdsim_load_image(GraphicUnit *graph_unit)
 {
-    graph_unit->image = IMG_LoadTexture(graph_unit->screen, "../res/lcd_layout.bmp");
+    graph_unit->image = IMG_LoadTexture(graph_unit->screen, "res/lcd_layout.bmp");
 }
 
 static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
