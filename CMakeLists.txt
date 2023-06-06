@@ -12,7 +12,7 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 
 # Copy the image to the build directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_layout.bmp
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_16x2_green.bmp
         DESTINATION ${CMAKE_BINARY_DIR}/res/)
 
 # Copy the binary file to the build directory
