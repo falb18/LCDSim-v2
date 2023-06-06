@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(lcdsim-prj VERSION 1.3.1)
+project(lcdsim VERSION 1.4.0)
 
 message("LCDSimv2 version ${CMAKE_PROJECT_VERSION}")
 

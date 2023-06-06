@@ -7,6 +7,8 @@ SDL v1.2, which is deprecated.
 LCDSim is a library, written in **C**, which allows you to simulate a HD44780 LCD 16x2 display on your computer.
 The LCD display is capable of showing text thanks to the use of the SDL and SDL-image libraries.
 
+<img src="./docs/imgs/lcdsim-v2-screenshot.png" width="" height="">
+
 The project is built using the following:
 - Meta-build system: cmake 3.24.0 (snap version)
 - Build system: GNU Make 4.1
@@ -26,10 +28,10 @@ cd build
 make
 ```
 
-To run the emulator:
+To run the example:
 ```
-cd build/src
-./lcd-example
+cd build/examples/hello-world
+./hello-world
 ```
 
 ## Documentation
@@ -37,6 +39,6 @@ cd build/src
 - docs/cgrom-organization.md
 - docs/functions.md
 
-## Bibliography
+## Resources
 - [LCD 16x2 image](http://paulvollmer.net/FritzingParts/parts/lcd-GDM1602K.html)
 - [Instruction Set](https://mil.ufl.edu/3744/docs/lcdmanual/commands.html)

@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-project(lcdsim VERSION 1.3.1)
-
 add_library(lcdsim STATIC
     "lcdsim.c"
     "hd44780/hd44780.c"
