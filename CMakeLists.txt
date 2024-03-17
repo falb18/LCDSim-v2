@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.28.0)
 project(lcdsim VERSION 1.4.0)
 
 message("LCDSimv2 version ${CMAKE_PROJECT_VERSION}")
@@ -14,6 +14,10 @@ include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 # Copy the image to the build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_16x2_green.bmp
         DESTINATION ${CMAKE_BINARY_DIR}/res/)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_16x2_blue.bmp
+                DESTINATION ${CMAKE_BINARY_DIR}/res/)
+
 
 # Copy the binary file to the build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/cgrom.bin
