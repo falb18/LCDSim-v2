@@ -9,11 +9,11 @@ The LCD display is capable of showing text thanks to the use of the SDL and SDL-
 
 <img src="./docs/imgs/lcdsim-v2-screenshot.png" width="" height="">
 
-The project is built using the following:
-- Meta-build system: cmake 3.24.0 (snap version)
-- Build system: GNU Make 4.1
-- Compiler: gcc 7.5.0
-- OS: Ubuntu 18.04
+The project is built with the following software:
+- Meta-build system: cmake 3.28.2 (snap version)
+- Build system: GNU Make 4.3
+- Compiler: gcc 12.3.0
+- OS: Ubuntu 23.04
 
 The project uses the following libraries:
 - SDL2 v2.0.12
