@@ -94,7 +94,8 @@ LCDSim* LCDSim_Destroy(LCDSim *lcdsim)
 
 static void lcdsim_load_image(GraphicUnit *graph_unit)
 {
-    graph_unit->image = IMG_LoadTexture(graph_unit->screen, LCDSIM_LCD_GREEN);
+    graph_unit->image = IMG_LoadTexture(graph_unit->screen, LCDSIM_LCD_BLUE);
+    printf("Loading image: %s\n", LCDSIM_LCD_BLUE);
 }
 
 static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
@@ -114,11 +115,13 @@ static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
             {
                 if (pixels[char_idx][x][y] == BLACK)
                 {
-                    SDL_SetRenderDrawColor(sdl_screen, 0, 0, 0, SDL_ALPHA_OPAQUE);
+                    // SDL_SetRenderDrawColor(sdl_screen, 44, 47, 38, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColor(sdl_screen, 213, 224 , 247, SDL_ALPHA_OPAQUE);
                 }
                 else
                 {
-                    SDL_SetRenderDrawColor(sdl_screen, 125, 159, 50, SDL_ALPHA_OPAQUE);
+                    // SDL_SetRenderDrawColor(sdl_screen, 125, 159, 50, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColor(sdl_screen, 59, 103, 189, SDL_ALPHA_OPAQUE);
                 }
                 
                 pixel.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * 16) + (x * PIXEL_SIZE);
