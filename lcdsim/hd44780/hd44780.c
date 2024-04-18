@@ -2,8 +2,6 @@
 
 #include "hd44780.h"
 
-#define CGROM_BIN_FILE "cgrom.bin"
-
 /*
  * Private function protoypes:
  * ==============================================
@@ -39,7 +37,7 @@ void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit)
     
     if (cgrom == NULL)
     {
-        printf("File %s not found\n", CGROM_BIN_FILE);
+        printf("File %s not found\n", LCDSIM_CGROM_BIN);
     }
     else
     {
