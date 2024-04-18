@@ -41,6 +41,19 @@
  */
 #define CHARACTER_PATTERN_SIZE (NUM_CHARACTER_CODES * BYTES_PER_CHARACTER)
 
+#ifdef LCDSIM_20x4
+/**
+ * The number of characters the LCD displays at once.
+ * Assuming a LCD of 20x4, the total is 80 characters.
+ */
+#define NUM_CHARS_LCD 32
+
+/**
+ * The number of characters per line.
+ * Assuming a LCD 20x4, the total is 20 characters.
+ */
+#define CHARS_PER_LINE 20
+#else
 /**
  * The number of characters the LCD displays at once.
  * Assuming a LCD of 16x2, the total is 32 characters.
@@ -52,6 +65,7 @@
  * Assuming a LCD 16x2, the total is 16 characters.
  */
 #define CHARS_PER_LINE 16
+#endif
 
 /**
  * The address refers to the DDRAM address which corresponds to the last position of the first line on the LCD.
@@ -82,14 +96,16 @@
 #define SET_CGRAM_ADDRESS 0x40
 
 /**
- * The margin in the X axis between the LCD image and the pixels of the characters. 
+ * The margin in the X axis between the LCD image and the pixels of the characters.
+ * The margin in the X axis between the LCD image and the pixels of the characters.
  */
-#define MARGIN_LCD_X 38
-
-/**
- * The margin in the X axis between the LCD image and the pixels of the characters. 
- */
-#define MARGIN_LCD_Y 50
+#ifdef LCDSIM_20x4
+    #define MARGIN_LCD_X 40
+    #define MARGIN_LCD_Y 50
+#else
+    #define MARGIN_LCD_X 38
+    #define MARGIN_LCD_Y 50
+#endif
 
 /**
  * The modified pixel size of each pixel on the LCD. 

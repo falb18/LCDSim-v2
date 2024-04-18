@@ -18,6 +18,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_16x2_green.bmp
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_16x2_blue.bmp
                 DESTINATION ${CMAKE_BINARY_DIR}/res/)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/lcd_20x4_green.png
+                DESTINATION ${CMAKE_BINARY_DIR}/res/)
 
 # Copy the binary file to the build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/cgrom.bin

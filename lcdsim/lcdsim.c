@@ -7,8 +7,13 @@
 
 #include "lcdsim.h"
 
-#define WINDOW_WIDTH 331
-#define WINDOW_HEIGHT 149
+#ifdef LCDSIM_20x4
+    #define WINDOW_WIDTH 400
+    #define WINDOW_HEIGHT 199
+#else
+    #define WINDOW_WIDTH 331
+    #define WINDOW_HEIGHT 149
+#endif
 
 /*
  * Private variables
@@ -35,7 +40,7 @@ LCDSim* LCDSim_Init()
 {
     char window_title[30];
 
-    sprintf(window_title, "LCDSim 16x2 v%s", LCDSIM_VERSION);
+    sprintf(window_title, "LCDSim v%s", LCDSIM_VERSION);
 
     /* Initialize SDL window and screen: */
     SDL_Init(SDL_INIT_VIDEO);
@@ -94,14 +99,28 @@ LCDSim* LCDSim_Destroy(LCDSim *lcdsim)
 
 static void lcdsim_load_image(GraphicUnit *graph_unit)
 {
-    graph_unit->image = IMG_LoadTexture(graph_unit->screen, LCDSIM_LCD_BLUE);
-    printf("Loading image: %s\n", LCDSIM_LCD_BLUE);
+    #ifdef LCDSIM_20x4
+        graph_unit->image = IMG_LoadTexture(graph_unit->screen, LCDSIM_20x4_LCD_GREEN);
+    #else
+        #ifdef LCDSIM_BLUE
+            graph_unit->image = IMG_LoadTexture(graph_unit->screen, LCDSIM_16x2_LCD_BLUE);
+        #else
+            graph_unit->image = IMG_LoadTexture(graph_unit->screen, LCDSIM_16x2_LCD_GREEN);
+        #endif
+    #endif
+
+    if (graph_unit->image == NULL)
+    {
+        printf("Image not found\n");
+    }
 }
 
 static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 {
     Uint8 char_idx, x, y;
-    Uint8 pixel_color;
+    Uint8 start_x = LCD_FONT_WIDTH * PIXEL_SIZE + 1;
+    Uint8 start_y = LCD_FONT_HEIGHT * PIXEL_SIZE + 1;
+    Uint8 row = 0;
     SDL_Rect pixel;
 
     pixel.w = PIXEL_SIZE;
@@ -109,23 +128,34 @@ static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
 
     for (char_idx = 0; char_idx < NUM_CHARS_LCD; char_idx++)
     {
+        row = (uint8_t)(char_idx / CHARS_PER_LINE);
+
         for (x = 0; x < LCD_FONT_WIDTH; x++)
         {
             for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
                 if (pixels[char_idx][x][y] == BLACK)
                 {
-                    // SDL_SetRenderDrawColor(sdl_screen, 44, 47, 38, SDL_ALPHA_OPAQUE);
-                    SDL_SetRenderDrawColor(sdl_screen, 213, 224 , 247, SDL_ALPHA_OPAQUE);
+                    #ifdef LCDSIM_BLUE
+                        SDL_SetRenderDrawColor(sdl_screen, 213, 224 , 247, SDL_ALPHA_OPAQUE);
+                    #else
+                        SDL_SetRenderDrawColor(sdl_screen, 44, 47, 38, SDL_ALPHA_OPAQUE);
+                    #endif
                 }
                 else
                 {
-                    // SDL_SetRenderDrawColor(sdl_screen, 125, 159, 50, SDL_ALPHA_OPAQUE);
-                    SDL_SetRenderDrawColor(sdl_screen, 59, 103, 189, SDL_ALPHA_OPAQUE);
+                    #ifdef LCDSIM_BLUE
+                       SDL_SetRenderDrawColor(sdl_screen, 59, 103, 189, SDL_ALPHA_OPAQUE);
+                    #else
+                        SDL_SetRenderDrawColor(sdl_screen, 125, 159, 50, SDL_ALPHA_OPAQUE);
+                    #endif
                 }
-                
-                pixel.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * 16) + (x * PIXEL_SIZE);
-                pixel.y = MARGIN_LCD_Y + ((char_idx >= CHARS_PER_LINE) * 25) + (y * PIXEL_SIZE);
+
+                /* The number 16 = 5 pixels of font width * PIXEL_SIZE + 1 pixel of space between characters
+                 * The number 25 = 8 pixels of font height * PIXEL_SIZE + 1 pixel of space between characters
+                 */
+                pixel.x = MARGIN_LCD_X + ((char_idx % CHARS_PER_LINE) * start_x) + (x * PIXEL_SIZE);
+                pixel.y = MARGIN_LCD_Y + (row * start_y) + (y * PIXEL_SIZE);
 
                 SDL_RenderFillRect(sdl_screen, &pixel);
             }
