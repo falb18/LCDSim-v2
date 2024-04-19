@@ -29,7 +29,7 @@ SDL_Renderer *sdl_screen = NULL;
  */
 
 static void lcdsim_load_image(GraphicUnit *graph_unit);
-static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT]);
+static void lcdsim_draw_pixels(Uint8 *pixels);
 
 /*
  * External functions:
@@ -115,12 +115,13 @@ static void lcdsim_load_image(GraphicUnit *graph_unit)
     }
 }
 
-static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
+static void lcdsim_draw_pixels(Uint8 *pixels)
 {
-    Uint8 char_idx, x, y;
+    Uint8 char_idx = 0, x = 0, y = 0;
     Uint8 start_x = LCD_FONT_WIDTH * PIXEL_SIZE + 1;
     Uint8 start_y = LCD_FONT_HEIGHT * PIXEL_SIZE + 1;
     Uint8 row = 0;
+    Uint16 idx = 0;
     SDL_Rect pixel;
 
     pixel.w = PIXEL_SIZE;
@@ -134,7 +135,8 @@ static void lcdsim_draw_pixels(Uint8 pixels[][LCD_FONT_WIDTH][LCD_FONT_HEIGHT])
         {
             for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
-                if (pixels[char_idx][x][y] == BLACK)
+                idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
+                if (pixels[idx] == BLACK)
                 {
                     #ifdef LCDSIM_BLUE
                         SDL_SetRenderDrawColor(sdl_screen, 213, 224 , 247, SDL_ALPHA_OPAQUE);

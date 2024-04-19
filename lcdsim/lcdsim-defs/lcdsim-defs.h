@@ -46,7 +46,7 @@
  * The number of characters the LCD displays at once.
  * Assuming a LCD of 20x4, the total is 80 characters.
  */
-#define NUM_CHARS_LCD 32
+#define NUM_CHARS_LCD 80
 
 /**
  * The number of characters per line.

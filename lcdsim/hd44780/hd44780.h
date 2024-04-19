@@ -21,7 +21,7 @@ typedef struct {
 } HD44780;
 
 typedef struct {
-    Uint8 lcd_pixels[NUM_CHARS_LCD][LCD_FONT_WIDTH][LCD_FONT_HEIGHT];
+    Uint8 *lcd_pixels;
     SDL_Renderer *screen;
     SDL_Texture *image;
 } GraphicUnit;
