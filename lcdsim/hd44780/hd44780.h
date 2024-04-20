@@ -29,7 +29,7 @@ typedef struct {
 /* Functions related to the HD44780 hardware emulation: */
 
 void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit);
-void HD44780_Update(HD44780 mcu, GraphicUnit *graph_unit);
+void HD44780_Update(HD44780 *mcu, GraphicUnit *graph_unit);
 void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction);
 
 #endif /* HD44780_H */

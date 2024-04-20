@@ -7,7 +7,8 @@
  * ==============================================
  */
 
-static void hd44780_update_pixels(HD44780 mcu, Uint8 *pixels);
+static void hd44780_update_pixels(HD44780 *mcu, Uint8 *pixels);
+static uint8_t get_ddram_address(uint8_t ddram_display, uint8_t char_idx);
 
 /*
  * External functions:
@@ -67,7 +68,7 @@ void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit)
     graph_unit->lcd_pixels = (Uint8 *)calloc(NUM_CHARS_LCD, LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
 }
 
-void HD44780_Update(HD44780 mcu, GraphicUnit *graph_unit)
+void HD44780_Update(HD44780 *mcu, GraphicUnit *graph_unit)
 {
     /* Clear the LCD pixel's buffer each time we write on it to avoid random data */
     memset(graph_unit->lcd_pixels, 0x00, (NUM_CHARS_LCD * LCD_FONT_WIDTH * LCD_FONT_HEIGHT));
@@ -212,14 +213,14 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
  * ==============================================
  */
 
-static void hd44780_update_pixels(HD44780 mcu, Uint8 *pixels)
+static void hd44780_update_pixels(HD44780 *mcu, Uint8 *pixels)
 {
-    Uint8 char_idx = 0 , x = 0 ,y = 0;
-    Uint16 idx = 0;
-    Uint8 ddram_address = 0;
-    Uint8 ddram_char_code = 0;
+    uint8_t char_idx = 0 , x = 0 ,y = 0;
+    uint16_t idx = 0;
+    uint8_t ddram_address = 0;
+    uint8_t ddram_char_code = 0;
     
-    if (mcu.LCD_DisplayEnable == DISPLAY_OFF)
+    if (mcu->LCD_DisplayEnable == DISPLAY_OFF)
     {
         memset(pixels, 0x00, (NUM_CHARS_LCD * LCD_FONT_WIDTH * LCD_FONT_HEIGHT));
     }
@@ -232,15 +233,14 @@ static void hd44780_update_pixels(HD44780 mcu, Uint8 *pixels)
                 for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
                     /* Get the DDRAM address (LCD position) where the given character is going to be displayed */
-                    ddram_address = mcu.DDRAM_display + (char_idx % CHARS_PER_LINE) +
-                                    (char_idx >= CHARS_PER_LINE) * SECOND_LINE_ADDRESS;
-                    
+                    ddram_address = get_ddram_address(mcu->DDRAM_display, char_idx);
+
                     /* Get the character code from the DDRAM address */
-                    ddram_char_code = mcu.DDRAM[ddram_address];
+                    ddram_char_code = mcu->DDRAM[ddram_address];
 
                     /* Turn ON or OFF the corresponding pixels of the character pattern given by the character code */
                     idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
-                    if ((mcu.CGROM[ddram_char_code][y] >> (LCD_FONT_WIDTH - 1 - x)) & 0x01)
+                    if ((mcu->CGROM[ddram_char_code][y] >> (LCD_FONT_WIDTH - 1 - x)) & 0x01)
                     {
                         pixels[idx] = BLACK;
                     }
@@ -254,33 +254,69 @@ static void hd44780_update_pixels(HD44780 mcu, Uint8 *pixels)
     }
 
     /* Turn ON or OFF the cursor depending of its configuraton */
-    if ((mcu.LCD_CursorState || mcu.LCD_CursorBlink == FIXED) && mcu.LCD_DisplayEnable && mcu.LCD_CursorEnable)
+    if ((mcu->LCD_CursorState || mcu->LCD_CursorBlink == FIXED) && mcu->LCD_DisplayEnable && mcu->LCD_CursorEnable)
     {
-        if ((mcu.DDRAM_display <= mcu.DDRAM_counter) && ((mcu.DDRAM_display + 0x0F) >= mcu.DDRAM_counter))
+        if ((mcu->DDRAM_display <= mcu->DDRAM_counter) && ((mcu->DDRAM_display + 0x0F) >= mcu->DDRAM_counter))
         {
             for (x = 0; x < LCD_FONT_WIDTH; x++)
             {
                 for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
-                    char_idx = mcu.DDRAM_counter - mcu.DDRAM_display;
+                    char_idx = mcu->DDRAM_counter - mcu->DDRAM_display;
                     idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
                     pixels[idx] = BLACK;
                 }
             }
         }
 
-        if ((SECOND_LINE_ADDRESS + mcu.DDRAM_display <= mcu.DDRAM_counter) &&
-                ((mcu.DDRAM_display + 0x4F) >= mcu.DDRAM_counter))
+        if ((SECOND_LINE_ADDRESS + mcu->DDRAM_display <= mcu->DDRAM_counter) &&
+                ((mcu->DDRAM_display + 0x4F) >= mcu->DDRAM_counter))
         {
             for (x = 0; x < LCD_FONT_WIDTH; x++)
             {
                 for (y = 0; y < LCD_FONT_HEIGHT; y++)
                 {
-                    char_idx = CHARS_PER_LINE + mcu.DDRAM_counter - mcu.DDRAM_display - SECOND_LINE_ADDRESS;
+                    char_idx = CHARS_PER_LINE + mcu->DDRAM_counter - mcu->DDRAM_display - SECOND_LINE_ADDRESS;
                     idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
                     pixels[idx] = BLACK;
                 }
             }
         }
     }
+}
+
+static uint8_t get_ddram_address(uint8_t ddram_display, uint8_t char_idx)
+{
+    uint8_t row = 0;
+    uint8_t address = 0;
+
+    row = (uint8_t)(char_idx / CHARS_PER_LINE);
+
+    #ifdef LCDSIM_20x4
+    switch (row)
+    {
+        case 0:
+            address = ddram_display + 0x00 + (char_idx % CHARS_PER_LINE);
+            break;
+        
+        case 1:
+            address = ddram_display + 0x40 + (char_idx % CHARS_PER_LINE);
+            break;
+        
+        case 2:
+            address = ddram_display + 0x14 + (char_idx % CHARS_PER_LINE);
+            break;
+        
+        case 3:
+            address = ddram_display + 0x54 + (char_idx % CHARS_PER_LINE);
+            break;
+        
+        default:
+            break;
+    }
+    #else
+    address = ddram_display + (char_idx % CHARS_PER_LINE) + row * SECOND_LINE_ADDRESS;
+    #endif
+
+    return address;
 }

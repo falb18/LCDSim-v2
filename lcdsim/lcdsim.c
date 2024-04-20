@@ -79,7 +79,7 @@ void LCDSim_Draw(LCDSim *lcdsim)
         lcdsim->lastTime = nowTime;
     }
 
-    HD44780_Update(lcdsim->mcu, &lcdsim->gu);
+    HD44780_Update(&lcdsim->mcu, &lcdsim->gu);
     lcdsim_draw_pixels(lcdsim->gu.lcd_pixels);
 }
 
