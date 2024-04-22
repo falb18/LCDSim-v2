@@ -67,6 +67,21 @@
 #define CHARS_PER_LINE 16
 #endif
 
+#define FIRST_LINE_ADDRESS  0x00
+
+/**
+ * The address refers to the DDRAM address wich corresponds to the beginning of the second
+ * line on the LCD. See p.11 of the datasheet.
+ */
+#define SECOND_LINE_ADDRESS 0x40
+
+#ifdef LCDSIM_20x4
+
+#define THIRD_LINE_ADDRESS  0x14
+#define FOURTH_LINE_ADDRESS 0x54
+
+#endif
+
 /**
  * The address refers to the DDRAM address which corresponds to the last position of the first line on the LCD.
  * See p.11 of the datasheet.
@@ -78,12 +93,6 @@
  * See p.11 of the datasheet.
  */
 #define SECOND_LINE_LAST_POS_DDRAM_ADDR 0x67
-
-/**
- * The address refers to the DDRAM address wich corresponds to the beginning of the second
- * line on the LCD. See p.11 of the datasheet.
- */
-#define SECOND_LINE_ADDRESS 0x40
 
 /**
  * The DDRAM address refers to the positio on the display. See p.11 of the datasheet.

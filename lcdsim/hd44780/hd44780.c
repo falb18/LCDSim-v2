@@ -9,6 +9,7 @@
 
 static void hd44780_update_pixels(HD44780 *mcu, Uint8 *pixels);
 static uint8_t get_ddram_address(uint8_t ddram_display, uint8_t char_idx);
+static uint8_t get_char_idx(uint8_t ddram_display, uint8_t ddram_counter);
 
 /*
  * External functions:
@@ -256,30 +257,14 @@ static void hd44780_update_pixels(HD44780 *mcu, Uint8 *pixels)
     /* Turn ON or OFF the cursor depending of its configuraton */
     if ((mcu->LCD_CursorState || mcu->LCD_CursorBlink == FIXED) && mcu->LCD_DisplayEnable && mcu->LCD_CursorEnable)
     {
-        if ((mcu->DDRAM_display <= mcu->DDRAM_counter) && ((mcu->DDRAM_display + 0x0F) >= mcu->DDRAM_counter))
-        {
-            for (x = 0; x < LCD_FONT_WIDTH; x++)
-            {
-                for (y = 0; y < LCD_FONT_HEIGHT; y++)
-                {
-                    char_idx = mcu->DDRAM_counter - mcu->DDRAM_display;
-                    idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
-                    pixels[idx] = BLACK;
-                }
-            }
-        }
+        char_idx = get_char_idx(mcu->DDRAM_display, mcu->DDRAM_counter);
 
-        if ((SECOND_LINE_ADDRESS + mcu->DDRAM_display <= mcu->DDRAM_counter) &&
-                ((mcu->DDRAM_display + 0x4F) >= mcu->DDRAM_counter))
+        for (x = 0; x < LCD_FONT_WIDTH; x++)
         {
-            for (x = 0; x < LCD_FONT_WIDTH; x++)
+            for (y = 0; y < LCD_FONT_HEIGHT; y++)
             {
-                for (y = 0; y < LCD_FONT_HEIGHT; y++)
-                {
-                    char_idx = CHARS_PER_LINE + mcu->DDRAM_counter - mcu->DDRAM_display - SECOND_LINE_ADDRESS;
-                    idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
-                    pixels[idx] = BLACK;
-                }
+                idx = y + (x * LCD_FONT_HEIGHT) + (char_idx * LCD_FONT_WIDTH * LCD_FONT_HEIGHT);
+                pixels[idx] = BLACK;
             }
         }
     }
@@ -288,35 +273,76 @@ static void hd44780_update_pixels(HD44780 *mcu, Uint8 *pixels)
 static uint8_t get_ddram_address(uint8_t ddram_display, uint8_t char_idx)
 {
     uint8_t row = 0;
-    uint8_t address = 0;
+    uint8_t start_address = 0;
 
     row = (uint8_t)(char_idx / CHARS_PER_LINE);
 
-    #ifdef LCDSIM_20x4
     switch (row)
     {
         case 0:
-            address = ddram_display + 0x00 + (char_idx % CHARS_PER_LINE);
+            start_address = FIRST_LINE_ADDRESS;
             break;
         
         case 1:
-            address = ddram_display + 0x40 + (char_idx % CHARS_PER_LINE);
+            start_address = SECOND_LINE_ADDRESS;
             break;
+
+        #ifdef LCDSIM_20x4
         
         case 2:
-            address = ddram_display + 0x14 + (char_idx % CHARS_PER_LINE);
+            start_address = THIRD_LINE_ADDRESS;
             break;
         
         case 3:
-            address = ddram_display + 0x54 + (char_idx % CHARS_PER_LINE);
+            start_address = FOURTH_LINE_ADDRESS;
             break;
         
+        #endif
+
         default:
             break;
     }
-    #else
-    address = ddram_display + (char_idx % CHARS_PER_LINE) + row * SECOND_LINE_ADDRESS;
-    #endif
 
-    return address;
+    return ddram_display + (char_idx % CHARS_PER_LINE) +  start_address;
+}
+
+static uint8_t get_char_idx(uint8_t ddram_display, uint8_t ddram_counter)
+{
+    #ifdef LCDSIM_20x4
+
+    if (ddram_counter < THIRD_LINE_ADDRESS)
+    {
+        /* Index is in the first row */
+        return ddram_counter - ddram_display;
+    }
+    else if (ddram_counter < SECOND_LINE_ADDRESS)
+    {
+        /* Index is in the third row */
+        return (CHARS_PER_LINE*2) + (ddram_counter - ddram_display - THIRD_LINE_ADDRESS);
+    }
+    else if (ddram_counter < FOURTH_LINE_ADDRESS)
+    {
+        /* Index is in the second row */
+        return CHARS_PER_LINE + (ddram_counter - ddram_display - SECOND_LINE_ADDRESS);
+    }
+    else
+    {
+        /* Index is in the fourth row */
+        return (CHARS_PER_LINE*3) + (ddram_counter - ddram_display - FOURTH_LINE_ADDRESS);
+    }
+
+    #else
+    
+    if ((ddram_display <= ddram_counter) && ((ddram_display + 0x0F) >= ddram_counter))
+    {
+        return ddram_counter - ddram_display;
+    }
+
+    if ((SECOND_LINE_ADDRESS + ddram_display <= ddram_counter) &&
+            ((ddram_display + 0x4F) >= ddram_counter))
+    {
+        return CHARS_PER_LINE + ddram_counter - ddram_display - SECOND_LINE_ADDRESS;
+    }
+    
+    #endif
 }
