@@ -18,14 +18,15 @@ static uint8_t get_char_idx(uint8_t ddram_display, uint8_t ddram_counter);
 
 void HD44780_Init(HD44780 *mcu, GraphicUnit *graph_unit)
 {
-    Uint16 i;
-    Uint8 j, cgrom_array[CHARACTER_PATTERN_SIZE];
+    uint16_t i;
+    uint8_t j;
+    Uint8 cgrom_array[CHARACTER_PATTERN_SIZE];
 
     /* Init internal registers of the HD44780 hardware emulator */
     mcu->CGRAM_counter = 0;
     mcu->DDRAM_counter = 0;
     mcu->DDRAM_display = 0;
-    mcu->LCD_EntryMode = 0x02;
+    mcu->LCD_EntryMode = INCREMENT_DDRAM_ADDRESS;
     mcu->LCD_CursorEnable = 0;
     mcu->LCD_CursorBlink = FIXED;
     mcu->LCD_CursorState = 0;
@@ -79,7 +80,7 @@ void HD44780_Update(HD44780 *mcu, GraphicUnit *graph_unit)
 
 void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
 {
-    Uint8 i, n, m;
+    uint8_t i, n, m;
 
     if (instruction & 0x0100)
     {
@@ -94,7 +95,7 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
         else
         {
             mcu->DDRAM[mcu->DDRAM_counter] = instruction & 0xFF;
-            if (mcu->LCD_EntryMode & 0x02)
+            if (mcu->LCD_EntryMode & INCREMENT_DDRAM_ADDRESS)
             {
                 if (mcu->DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
                 {
@@ -103,7 +104,7 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
                     else
                         mcu->DDRAM_counter++;
                 }
-                if (mcu->LCD_EntryMode & 0x01)
+                if (mcu->LCD_EntryMode & SHIFT_DISPLAY)
                 {
                     if (mcu->DDRAM_display < 24)
                         mcu->DDRAM_display++;
@@ -118,7 +119,7 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
                     else
                         mcu->DDRAM_counter--;
                 }
-                if (mcu->LCD_EntryMode & 0x01)
+                if (mcu->LCD_EntryMode & SHIFT_DISPLAY)
                 {
                     if (mcu->DDRAM_display > 0)
                         mcu->DDRAM_display--;
@@ -129,7 +130,7 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
     else
     {
         for (i = 0; i < 8; i++)
-            if (instruction & (0x80 >> i))
+            if (instruction & (SET_DDRAM_ADDRESS >> i))
                 break;
         switch (i)
         {
@@ -145,9 +146,9 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
                 break;
             /* CURSOR/DISPLAY SHIFT */
             case 3:
-                if (instruction & 0x08)
+                if (instruction & DISPLAY_SHIFT)
                 {
-                    if (instruction & 0x04)
+                    if (instruction & MOVE_RIGHT)
                     {
                         if (mcu->DDRAM_display < 24)
                             mcu->DDRAM_display++;
@@ -160,7 +161,7 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
                 }
                 else
                 {
-                    if (instruction & 0x04)
+                    if (instruction & MOVE_RIGHT)
                     {
                         if (mcu->DDRAM_counter < (SECOND_LINE_LAST_POS_DDRAM_ADDR + 1))
                         {
@@ -184,14 +185,14 @@ void HD44780_ParseCMD(HD44780 *mcu, Uint16 instruction)
                 break;
             /* DISPLAY ON/OFF CONTROL */
             case 4:
-                mcu->LCD_CursorBlink = instruction & 0x01;
-                mcu->LCD_CursorEnable = (instruction & 0x02) >> 1;
-                mcu->LCD_DisplayEnable = (instruction & 0x04) >> 2;
+                mcu->LCD_CursorBlink = instruction & BLINK_ON;
+                mcu->LCD_CursorEnable = (instruction & CURSOR_ON) >> 1;
+                mcu->LCD_DisplayEnable = (instruction & DISPLAY_ON) >> 2;
                 mcu->LCD_CursorState = 0;
                 break;
             /* ENTRY MODE SET */
             case 5:
-                mcu->LCD_EntryMode = instruction & 0x03;
+                mcu->LCD_EntryMode = instruction & (INCREMENT_DDRAM_ADDRESS | SHIFT_DISPLAY);
                 break;
             /* HOME */
             case 6:
