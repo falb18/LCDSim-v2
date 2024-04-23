@@ -5,12 +5,12 @@
 To load all the character into the CGROM, LCDSim reads a file called cgrom.bin. This file contains the representation
 of a bunch of ASCII code (0x20 ' ' to 0x7D '}' in the original cgrom.bin).
 
-<img src="./imgs/hexview.png" width="" height="450">
+I've organised the hex editor to display 9 bytes on each line. The first byte of the row (highlighted in red) is the
+ASCII code that we want to draw onto the LCD display. The other 8 bytes (highlighted in green) correspond to the
+pixels of each character. The first byte represent the top pixels of the character and the last byte is the bottom
+pixels.
 
-I've organised the editor to display 9 bytes on each line. The first byte of the line (in red) is the ASCII code that
-we want to draw into the LCD display. The 8 others bytes (in green) are the 8 bytes that correspond to the
-pixel-drawing of the character. 8 bytes for 8 lines. The first byte of them is the top of the character and the last
-is the bottom.
+<img src="./imgs/hexview.png" width="" height="450">
 
 ## How to update the cgrom.bin file?
 

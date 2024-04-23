@@ -4,8 +4,7 @@ This is an update of the library [LCDSim](https://github.com/dylangageot/LCDSim)
 The purpose of this project is to update the library so it uses SDL2, since the previous version of this library uses
 SDL v1.2, which is deprecated.
 
-LCDSim is a library, written in **C**, which allows you to simulate a HD44780 LCD 16x2 display on your computer.
-The LCD display is capable of showing text thanks to the use of the SDL and SDL-image libraries.
+LCDSim is a library, written in **C**, which allows you to simulate a HD44780 LCD 16x2 or 20x4 display on your computer.
 
 <img src="./docs/imgs/lcdsim-v2-screenshot.png" width="" height="">
 
@@ -22,23 +21,33 @@ The project uses the following libraries:
 ## Compile the project and run the emulator
 
 To compile the project run the following command:
-``` 
+```bash
 cmake -S ./ -B build/
 cd build
 make
 ```
 
 To run the example:
-```
+```bash
 cd build/examples/hello-world
 ./hello-world
 ```
 
+## Select LCD type
+In file lcdsim/CMakeLists.txt are the following definitions to select between 16x2 or 20x4 LCD type or between green and
+blue LCD display. By default the LCD 16x2 green display is selected:
+```cmake
+PRIVATE LCDSIM_20x4
+PRIVATE LCDSIM_BLUE
+```
+
 ## Documentation
 
-- docs/cgrom-organization.md
-- docs/functions.md
+- [How to configure a third party library](docs/how-to-use-library.md)
+- [Functions description](docs/functions.md)
+- [CGROM organization](docs/cgrom-organization.md)
 
 ## Resources
 - [LCD 16x2 image](http://paulvollmer.net/FritzingParts/parts/lcd-GDM1602K.html)
+- [LCD 20x4 image](https://johnny-five.readthedocs.io/en/latest/lcd-runner-20x4/)
 - [Instruction Set](https://mil.ufl.edu/3744/docs/lcdmanual/commands.html)

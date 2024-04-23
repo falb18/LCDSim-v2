@@ -16,7 +16,7 @@ target_link_libraries(lcdsim PRIVATE ${SDL2_IMAGE_LIBRARIES})
 
 target_compile_definitions(lcdsim
     PRIVATE LCDSIM_VERSION="${PROJECT_VERSION}"
-    PRIVATE LCDSIM_20x4
+    # PRIVATE LCDSIM_20x4
     PRIVATE LCDSIM_CGROM_BIN="${CMAKE_BINARY_DIR}/res/cgrom.bin"
     # PRIVATE LCDSIM_BLUE
     PRIVATE LCDSIM_16x2_LCD_GREEN="${CMAKE_BINARY_DIR}/res/lcd_16x2_green.bmp"
