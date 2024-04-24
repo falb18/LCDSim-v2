@@ -6,7 +6,9 @@ SDL v1.2, which is deprecated.
 
 LCDSim is a library, written in **C**, which allows you to simulate a HD44780 LCD 16x2 or 20x4 display on your computer.
 
-<img src="./docs/imgs/lcdsim-v2-screenshot.png" width="" height="">
+<img src="./docs/imgs/lcdsim-16x2-v2-screenshot.png" width="" height="">
+
+<img src="./docs/imgs/lcdsim-20x4-v2-screenshot.png" width="" height="">
 
 The project is built with the following software:
 - Meta-build system: cmake 3.28.2 (snap version)
